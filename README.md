@@ -67,7 +67,7 @@ python app.py
    - Select your repository
    - Give your service a name
    - Choose Python 3 as the runtime
-   - Set the build command: `pip install -r requirements.txt`
+   - Set the build command: `bash ./build.sh`
    - Set the start command: `gunicorn app:app`
 4. Add Environment Variables:
    - `SECRET_KEY`: Generate a secure random string
@@ -77,7 +77,11 @@ python app.py
 5. Choose an appropriate plan (consider resource requirements if using ML models)
 6. Click "Create Web Service"
 
-**Note:** If you encounter PyTorch installation issues, the `requirements.txt` file already specifies a compatible version (`torch==2.7.1`).
+**Troubleshooting Render Deployment:**
+
+- If you encounter Cargo/Rust errors like `failed to create directory /usr/local/cargo/registry/cache`, the app will automatically fall back to mock data mode.
+- For persistent model storage, consider upgrading to a paid Render plan with a disk volume.
+- The `build.sh` script is provided to handle permissions and setup automatically.
 
 ## How It Works
 

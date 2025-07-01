@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: ai-interview-question-generator
+    env: python
+    buildCommand: bash ./build.sh
+    startCommand: gunicorn app:app
+    autoDeploy: true
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.10.0
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DEBUG
+        value: false
+      - key: USE_MODELS
+        value: false
+      - key: MODEL_CACHE_DIR
+        value: /tmp/models
+      - key: RENDER
+        value: true
+    plan: free

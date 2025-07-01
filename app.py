@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, jsonify, session
 import os
 import random
 import uuid
+import platform
 
 # Try to load environment variables from .env file if available
 try:
@@ -17,34 +18,53 @@ app.secret_key = os.environ.get('SECRET_KEY', 'default-secret-key-for-dev')
 # Set a flag to track if we're using models or mock data
 USE_MODELS = os.environ.get('USE_MODELS', 'False').lower() == 'true'
 
-try:
-    from transformers import GPT2LMHeadModel, GPT2Tokenizer, T5ForConditionalGeneration, T5Tokenizer
-    import torch
+# Check if we're running on Render
+if 'RENDER' in os.environ:
+    print("Running on Render - forcing mock data mode")
+    USE_MODELS = False
     
-    print(f"Using PyTorch version: {torch.__version__}")
-    
-    # Load models
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    print(f"Using device: {device}")
-    
-    # Get model cache directory from environment variable
-    model_cache_dir = os.environ.get('MODEL_CACHE_DIR', './models')
-    
-    # Initialize question generator model (GPT-2)
-    question_model_name = "gpt2"
-    question_tokenizer = GPT2Tokenizer.from_pretrained(question_model_name, cache_dir=model_cache_dir)
-    question_model = GPT2LMHeadModel.from_pretrained(question_model_name, cache_dir=model_cache_dir).to(device)
-    
-    # Initialize evaluator model (T5)
-    evaluator_model_name = "t5-small"
-    evaluator_tokenizer = T5Tokenizer.from_pretrained(evaluator_model_name, cache_dir=model_cache_dir)
-    evaluator_model = T5ForConditionalGeneration.from_pretrained(evaluator_model_name, cache_dir=model_cache_dir).to(device)
-    
-    USE_MODELS = True
-    print("Successfully loaded machine learning models.")
-except Exception as e:
-    print(f"Failed to load models: {e}")
-    print("Running in mock data mode.")
+print(f"System: {platform.system()}, Python: {platform.python_version()}")
+print(f"Using models: {USE_MODELS}")
+
+# Only try to load models if USE_MODELS is True
+if USE_MODELS:
+    try:
+        from transformers import GPT2LMHeadModel, GPT2Tokenizer, T5ForConditionalGeneration, T5Tokenizer
+        import torch
+        
+        print(f"Using PyTorch version: {torch.__version__}")
+        
+        # Load models
+        device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        print(f"Using device: {device}")
+        
+        # Get model cache directory from environment variable
+        model_cache_dir = os.environ.get('MODEL_CACHE_DIR', './models')
+        os.makedirs(model_cache_dir, exist_ok=True)
+        print(f"Using model cache directory: {model_cache_dir}")
+        
+        try:
+            # Initialize question generator model (GPT-2)
+            question_model_name = "gpt2"
+            question_tokenizer = GPT2Tokenizer.from_pretrained(question_model_name, cache_dir=model_cache_dir)
+            question_model = GPT2LMHeadModel.from_pretrained(question_model_name, cache_dir=model_cache_dir).to(device)
+            
+            # Initialize evaluator model (T5)
+            evaluator_model_name = "t5-small"
+            evaluator_tokenizer = T5Tokenizer.from_pretrained(evaluator_model_name, cache_dir=model_cache_dir)
+            evaluator_model = T5ForConditionalGeneration.from_pretrained(evaluator_model_name, cache_dir=model_cache_dir).to(device)
+            
+            print("Successfully loaded machine learning models.")
+        except Exception as model_error:
+            print(f"Failed to load models due to error: {model_error}")
+            print("Running in mock data mode.")
+            USE_MODELS = False
+    except Exception as e:
+        print(f"Failed to import required modules: {e}")
+        print("Running in mock data mode.")
+        USE_MODELS = False
+else:
+    print("Models disabled via configuration. Running in mock data mode.")
 
 def generate_questions(subject, num_questions=5):
     """Generate interview questions based on the subject."""
