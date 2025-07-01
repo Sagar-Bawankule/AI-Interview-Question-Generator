@@ -3,28 +3,42 @@ import os
 import random
 import uuid
 
+# Try to load environment variables from .env file if available
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+    print("Loaded environment variables from .env file")
+except ImportError:
+    print("python-dotenv not installed, using default environment variables")
+
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', 'default-secret-key-for-dev')
 
 # Set a flag to track if we're using models or mock data
-USE_MODELS = False
+USE_MODELS = os.environ.get('USE_MODELS', 'False').lower() == 'true'
 
 try:
     from transformers import GPT2LMHeadModel, GPT2Tokenizer, T5ForConditionalGeneration, T5Tokenizer
     import torch
     
+    print(f"Using PyTorch version: {torch.__version__}")
+    
     # Load models
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    print(f"Using device: {device}")
+    
+    # Get model cache directory from environment variable
+    model_cache_dir = os.environ.get('MODEL_CACHE_DIR', './models')
     
     # Initialize question generator model (GPT-2)
     question_model_name = "gpt2"
-    question_tokenizer = GPT2Tokenizer.from_pretrained(question_model_name)
-    question_model = GPT2LMHeadModel.from_pretrained(question_model_name).to(device)
+    question_tokenizer = GPT2Tokenizer.from_pretrained(question_model_name, cache_dir=model_cache_dir)
+    question_model = GPT2LMHeadModel.from_pretrained(question_model_name, cache_dir=model_cache_dir).to(device)
     
     # Initialize evaluator model (T5)
     evaluator_model_name = "t5-small"
-    evaluator_tokenizer = T5Tokenizer.from_pretrained(evaluator_model_name)
-    evaluator_model = T5ForConditionalGeneration.from_pretrained(evaluator_model_name).to(device)
+    evaluator_tokenizer = T5Tokenizer.from_pretrained(evaluator_model_name, cache_dir=model_cache_dir)
+    evaluator_model = T5ForConditionalGeneration.from_pretrained(evaluator_model_name, cache_dir=model_cache_dir).to(device)
     
     USE_MODELS = True
     print("Successfully loaded machine learning models.")

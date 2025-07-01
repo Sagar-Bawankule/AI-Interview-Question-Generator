@@ -61,12 +61,23 @@ python app.py
 
 ### Deploying to Render
 
-1. Sign up for a Render account
+1. Sign up for a [Render account](https://render.com/)
 2. Connect your GitHub repository
-3. Create a new Web Service
-4. Set the build command: `pip install -r requirements.txt`
-5. Set the start command: `gunicorn app:app`
-6. Deploy the application
+3. Create a new Web Service:
+   - Select your repository
+   - Give your service a name
+   - Choose Python 3 as the runtime
+   - Set the build command: `pip install -r requirements.txt`
+   - Set the start command: `gunicorn app:app`
+4. Add Environment Variables:
+   - `SECRET_KEY`: Generate a secure random string
+   - `DEBUG`: Set to `False` for production
+   - `USE_MODELS`: Set to `True` to use ML models or `False` for mock data
+   - `MODEL_CACHE_DIR`: Set to `/tmp/models` for Render's filesystem
+5. Choose an appropriate plan (consider resource requirements if using ML models)
+6. Click "Create Web Service"
+
+**Note:** If you encounter PyTorch installation issues, the `requirements.txt` file already specifies a compatible version (`torch==2.7.1`).
 
 ## How It Works
 
