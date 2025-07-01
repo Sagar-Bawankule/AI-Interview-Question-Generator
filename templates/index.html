@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Interview Question Generator & Evaluator</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container my-5">
+        <h1 class="text-center mb-4">AI Interview Question Generator & Evaluator</h1>
+        
+        <div id="subject-form" class="card p-4 shadow-sm mb-4">
+            <form id="generate-form">
+                <div class="mb-3">
+                    <label for="subject" class="form-label">Enter a subject for interview questions:</label>
+                    <input type="text" class="form-control" id="subject" name="subject" placeholder="e.g., DBMS, Python, Machine Learning" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Generate Questions</button>
+            </form>
+        </div>
+        
+        <div id="loading" class="text-center d-none">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <p>Generating questions, please wait...</p>
+        </div>
+        
+        <div id="questions-section" class="d-none">
+            <h2 class="mb-3">Interview Questions</h2>
+            <p class="text-muted mb-4">Answer the following questions to test your knowledge:</p>
+            
+            <form id="answers-form">
+                <div id="questions-container">
+                    <!-- Questions will be dynamically added here -->
+                </div>
+                
+                <button type="submit" class="btn btn-success mt-4">Submit Answers for Evaluation</button>
+            </form>
+        </div>
+        
+        <div id="evaluation-loading" class="text-center d-none">
+            <div class="spinner-border text-success" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <p>Evaluating your answers, please wait...</p>
+        </div>
+        
+        <div id="results-section" class="d-none mt-5">
+            <h2 class="mb-4">Evaluation Results</h2>
+            <div id="results-container">
+                <!-- Results will be dynamically added here -->
+            </div>
+            
+            <button id="try-again" class="btn btn-outline-primary mt-4">Try Another Subject</button>
+        </div>
+        
+        <div class="alert alert-danger d-none mt-3" id="error-message"></div>
+    </div>
+    
+    <footer class="bg-light py-3 mt-5">
+        <div class="container text-center">
+            <p class="text-muted mb-0">AI Interview Question Generator & Evaluator &copy; 2025</p>
+        </div>
+    </footer>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const generateForm = document.getElementById('generate-form');
+            const answersForm = document.getElementById('answers-form');
+            const subjectForm = document.getElementById('subject-form');
+            const questionsSection = document.getElementById('questions-section');
+            const resultsSection = document.getElementById('results-section');
+            const loading = document.getElementById('loading');
+            const evalLoading = document.getElementById('evaluation-loading');
+            const errorMessage = document.getElementById('error-message');
+            const tryAgainBtn = document.getElementById('try-again');
+            
+            // Generate questions
+            generateForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const subject = document.getElementById('subject').value.trim();
+                if (!subject) return;
+                
+                // Show loading
+                loading.classList.remove('d-none');
+                errorMessage.classList.add('d-none');
+                
+                // Send request to generate questions
+                fetch('/generate_questions', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: new URLSearchParams({
+                        'subject': subject
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    loading.classList.add('d-none');
+                    
+                    if (data.error) {
+                        errorMessage.textContent = data.error;
+                        errorMessage.classList.remove('d-none');
+                        return;
+                    }
+                    
+                    // Display questions
+                    const questionsContainer = document.getElementById('questions-container');
+                    questionsContainer.innerHTML = '';
+                    
+                    data.questions.forEach((question, index) => {
+                        const questionCard = document.createElement('div');
+                        questionCard.className = 'card mb-4 shadow-sm';
+                        questionCard.innerHTML = `
+                            <div class="card-header bg-light">
+                                <h5 class="card-title mb-0">Question ${index + 1}</h5>
+                            </div>
+                            <div class="card-body">
+                                <p class="card-text">${question}</p>
+                                <div class="form-group">
+                                    <label for="answer-${index}" class="form-label">Your Answer:</label>
+                                    <textarea class="form-control" id="answer-${index}" name="answers[]" rows="3" required></textarea>
+                                </div>
+                            </div>
+                        `;
+                        questionsContainer.appendChild(questionCard);
+                    });
+                    
+                    // Show questions section
+                    subjectForm.classList.add('d-none');
+                    questionsSection.classList.remove('d-none');
+                })
+                .catch(error => {
+                    loading.classList.add('d-none');
+                    errorMessage.textContent = 'An error occurred. Please try again.';
+                    errorMessage.classList.remove('d-none');
+                    console.error('Error:', error);
+                });
+            });
+            
+            // Submit answers for evaluation
+            answersForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                // Show loading
+                evalLoading.classList.remove('d-none');
+                errorMessage.classList.add('d-none');
+                
+                // Collect all answers
+                const formData = new FormData(answersForm);
+                
+                // Send request to evaluate answers
+                fetch('/evaluate_answers', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    evalLoading.classList.add('d-none');
+                    
+                    if (data.error) {
+                        errorMessage.textContent = data.error;
+                        errorMessage.classList.remove('d-none');
+                        return;
+                    }
+                    
+                    // Display evaluation results
+                    const resultsContainer = document.getElementById('results-container');
+                    resultsContainer.innerHTML = '';
+                    
+                    let totalScore = 0;
+                    
+                    data.evaluations.forEach((item, index) => {
+                        const resultCard = document.createElement('div');
+                        resultCard.className = 'card mb-4 shadow-sm';
+                        
+                        // Determine the color based on correctness
+                        let headerClass = 'bg-warning'; // Default for partially correct
+                        if (item.evaluation.correctness === 'Correct') {
+                            headerClass = 'bg-success text-white';
+                        } else if (item.evaluation.correctness === 'Incorrect') {
+                            headerClass = 'bg-danger text-white';
+                        }
+                        
+                        totalScore += item.evaluation.rating;
+                        
+                        resultCard.innerHTML = `
+                            <div class="card-header ${headerClass}">
+                                <h5 class="card-title mb-0">Question ${index + 1} - ${item.evaluation.correctness}</h5>
+                            </div>
+                            <div class="card-body">
+                                <h6>Question:</h6>
+                                <p>${item.question}</p>
+                                
+                                <h6>Your Answer:</h6>
+                                <p>${item.answer}</p>
+                                
+                                <h6>Feedback:</h6>
+                                <p>${item.evaluation.feedback}</p>
+                                
+                                <div class="d-flex align-items-center">
+                                    <h6 class="mb-0 me-2">Rating:</h6>
+                                    <div class="rating">
+                                        ${'★'.repeat(item.evaluation.rating)}${'☆'.repeat(5 - item.evaluation.rating)}
+                                    </div>
+                                    <span class="ms-2">${item.evaluation.rating}/5</span>
+                                </div>
+                            </div>
+                        `;
+                        resultsContainer.appendChild(resultCard);
+                    });
+                    
+                    // Add overall score
+                    const averageScore = totalScore / data.evaluations.length;
+                    const scoreCard = document.createElement('div');
+                    scoreCard.className = 'card bg-light mb-4';
+                    scoreCard.innerHTML = `
+                        <div class="card-body text-center">
+                            <h4>Overall Score: ${averageScore.toFixed(1)}/5</h4>
+                            <p>You answered ${data.evaluations.length} questions</p>
+                        </div>
+                    `;
+                    resultsContainer.prepend(scoreCard);
+                    
+                    // Show results section
+                    questionsSection.classList.add('d-none');
+                    resultsSection.classList.remove('d-none');
+                })
+                .catch(error => {
+                    evalLoading.classList.add('d-none');
+                    errorMessage.textContent = 'An error occurred during evaluation. Please try again.';
+                    errorMessage.classList.remove('d-none');
+                    console.error('Error:', error);
+                });
+            });
+            
+            // Try again button
+            tryAgainBtn.addEventListener('click', function() {
+                resultsSection.classList.add('d-none');
+                subjectForm.classList.remove('d-none');
+                document.getElementById('subject').value = '';
+            });
+        });
+    </script>
+</body>
+</html>
