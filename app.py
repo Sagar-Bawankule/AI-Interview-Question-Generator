@@ -3,6 +3,14 @@ import os
 import random
 import uuid
 import platform
+import sys
+
+# Print system information for debugging
+print(f"Python version: {platform.python_version()}")
+print(f"System: {platform.system()}")
+print(f"Platform: {platform.platform()}")
+print(f"Directory: {os.getcwd()}")
+print(f"Executable: {sys.executable}")
 
 # Try to load environment variables from .env file if available
 try:
@@ -15,24 +23,25 @@ except ImportError:
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', 'default-secret-key-for-dev')
 
-# Set a flag to track if we're using models or mock data
-USE_MODELS = os.environ.get('USE_MODELS', 'False').lower() == 'true'
-
-# Check if we're running on Render
-if 'RENDER' in os.environ:
-    print("Running on Render - forcing mock data mode")
+# Always force mock data mode for Render deployment
+if 'RENDER' in os.environ or os.environ.get('USE_MODELS', 'False').lower() != 'true':
     USE_MODELS = False
-    
-print(f"System: {platform.system()}, Python: {platform.python_version()}")
-print(f"Using models: {USE_MODELS}")
+    print("Running in mock data mode (forced by environment)")
+else:
+    USE_MODELS = True
+    print("Will attempt to use ML models")
+
+print(f"USE_MODELS setting: {USE_MODELS}")
 
 # Only try to load models if USE_MODELS is True
 if USE_MODELS:
     try:
+        print("Trying to import ML libraries...")
         from transformers import GPT2LMHeadModel, GPT2Tokenizer, T5ForConditionalGeneration, T5Tokenizer
         import torch
         
-        print(f"Using PyTorch version: {torch.__version__}")
+        print(f"Successfully imported ML libraries")
+        print(f"PyTorch version: {torch.__version__}")
         
         # Load models
         device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -44,6 +53,7 @@ if USE_MODELS:
         print(f"Using model cache directory: {model_cache_dir}")
         
         try:
+            print("Loading models...")
             # Initialize question generator model (GPT-2)
             question_model_name = "gpt2"
             question_tokenizer = GPT2Tokenizer.from_pretrained(question_model_name, cache_dir=model_cache_dir)
@@ -57,11 +67,11 @@ if USE_MODELS:
             print("Successfully loaded machine learning models.")
         except Exception as model_error:
             print(f"Failed to load models due to error: {model_error}")
-            print("Running in mock data mode.")
+            print("Falling back to mock data mode.")
             USE_MODELS = False
     except Exception as e:
         print(f"Failed to import required modules: {e}")
-        print("Running in mock data mode.")
+        print("Falling back to mock data mode.")
         USE_MODELS = False
 else:
     print("Models disabled via configuration. Running in mock data mode.")

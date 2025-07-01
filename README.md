@@ -61,27 +61,40 @@ python app.py
 
 ### Deploying to Render
 
-1. Sign up for a [Render account](https://render.com/)
-2. Connect your GitHub repository
-3. Create a new Web Service:
-   - Select your repository
-   - Give your service a name
-   - Choose Python 3 as the runtime
-   - Set the build command: `bash ./build.sh`
-   - Set the start command: `gunicorn app:app`
-4. Add Environment Variables:
-   - `SECRET_KEY`: Generate a secure random string
-   - `DEBUG`: Set to `False` for production
-   - `USE_MODELS`: Set to `True` to use ML models or `False` for mock data
-   - `MODEL_CACHE_DIR`: Set to `/tmp/models` for Render's filesystem
-5. Choose an appropriate plan (consider resource requirements if using ML models)
+There are two ways to deploy to Render:
+
+#### Option 1: Direct GitHub Integration (Recommended)
+
+1. Fork or push this repository to your GitHub account
+2. Sign up for a [Render account](https://render.com/)
+3. In Render, click "New+" and select "Web Service"
+4. Connect your GitHub account and select your repository
+5. Render will automatically detect the configuration in `render.yaml`
 6. Click "Create Web Service"
 
-**Troubleshooting Render Deployment:**
+#### Option 2: Manual Configuration
 
-- If you encounter Cargo/Rust errors like `failed to create directory /usr/local/cargo/registry/cache`, the app will automatically fall back to mock data mode.
-- For persistent model storage, consider upgrading to a paid Render plan with a disk volume.
-- The `build.sh` script is provided to handle permissions and setup automatically.
+If you prefer to set up manually:
+
+1. Sign up for a [Render account](https://render.com/)
+2. In Render, click "New+" and select "Web Service"
+3. Connect your GitHub repository
+4. Configure your service:
+   - **Name**: Choose a name for your service
+   - **Environment**: Python 3
+   - **Region**: Ohio (or your preferred region)
+   - **Branch**: main (or your default branch)
+   - **Build Command**: `bash ./build.sh`
+   - **Start Command**: `gunicorn app:app`
+5. Add these Environment Variables:
+   - `SECRET_KEY`: Generate a secure random string
+   - `DEBUG`: `false`
+   - `USE_MODELS`: `false`
+   - `MODEL_CACHE_DIR`: `/tmp/models`
+   - `RENDER`: `true`
+6. Click "Create Web Service"
+
+**Note**: The application is configured to run in mock data mode on Render to avoid compilation issues with machine learning libraries. This still provides a great user experience with sample questions and evaluations.
 
 ## How It Works
 

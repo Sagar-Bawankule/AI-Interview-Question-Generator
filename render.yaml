@@ -2,6 +2,7 @@ services:
   - type: web
     name: ai-interview-question-generator
     env: python
+    region: ohio
     buildCommand: bash ./build.sh
     startCommand: gunicorn app:app
     autoDeploy: true
