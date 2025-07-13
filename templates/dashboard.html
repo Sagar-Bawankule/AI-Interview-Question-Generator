@@ -152,10 +152,10 @@
         const scoreChart = new Chart(scoreCtx, {
             type: 'line',
             data: {
-                labels: {{ score_data.dates|tojson }},
+                labels: {{ score_data.dates|tojson|safe }},
                 datasets: [{
                     label: 'Average Score',
-                    data: {{ score_data.scores|tojson }},
+                    data: {{ score_data.scores|tojson|safe }},
                     backgroundColor: 'rgba(54, 162, 235, 0.2)',
                     borderColor: 'rgba(54, 162, 235, 1)',
                     borderWidth: 2,
@@ -182,9 +182,9 @@
         const subjectChart = new Chart(subjectCtx, {
             type: 'doughnut',
             data: {
-                labels: {{ subject_data.subjects|tojson }},
+                labels: {{ subject_data.subjects|tojson|safe }},
                 datasets: [{
-                    data: {{ subject_data.counts|tojson }},
+                    data: {{ subject_data.counts|tojson|safe }},
                     backgroundColor: [
                         'rgba(255, 99, 132, 0.7)',
                         'rgba(54, 162, 235, 0.7)',
