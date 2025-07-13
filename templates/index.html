@@ -8,14 +8,398 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="{{ url_for('index') }}">
+                <i class="fas fa-brain me-2"></i>AI Interview Question Generator
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    {% if current_user.is_authenticated %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('dashboard') }}">Dashboard</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('quiz') }}">Practice</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('leaderboard') }}">Leaderboard</a>
+                    </li>
+                    {% if current_user.is_admin %}
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="adminDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            Admin
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="adminDropdown">
+                            <li><a class="dropdown-item" href="{{ url_for('admin.dashboard') }}">Admin Dashboard</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('admin.users') }}">Manage Users</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('admin.attempts') }}">View Attempts</a></li>
+                        </ul>
+                    </li>
+                    {% endif %}
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            {{ current_user.username }}
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="userDropdown">
+                            <li><a class="dropdown-item" href="{{ url_for('auth.profile') }}">Profile</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="{{ url_for('auth.logout') }}">Logout</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item">
+                        <button class="btn btn-outline-light btn-sm ms-2" id="themeToggle">
+                            <span id="themeIcon">🌙</span>
+                        </button>
+                    </li>
+                    {% else %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('auth.login') }}">Login</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('auth.register') }}">Register</a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <div class="bg-primary text-white py-5">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-6">
+                    <h1 class="display-4 fw-bold mb-4">AI-Powered Interview Practice</h1>
+                    <p class="lead mb-4">
+                        Enhance your interview skills with our AI-powered question generator and intelligent answer evaluation system.
+                    </p>
+                    <div class="d-flex flex-wrap gap-2">
+                        {% if current_user.is_authenticated %}
+                            <a href="{{ url_for('quiz') }}" class="btn btn-light btn-lg">
+                                <i class="fas fa-play me-2"></i>Start Practice
+                            </a>
+                            <a href="{{ url_for('dashboard') }}" class="btn btn-outline-light btn-lg">
+                                <i class="fas fa-chart-line me-2"></i>View Dashboard
+                            </a>
+                        {% else %}
+                            <a href="{{ url_for('auth.register') }}" class="btn btn-light btn-lg">
+                                <i class="fas fa-user-plus me-2"></i>Get Started Free
+                            </a>
+                            <a href="{{ url_for('auth.login') }}" class="btn btn-outline-light btn-lg">
+                                <i class="fas fa-sign-in-alt me-2"></i>Login
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="col-lg-6 text-center">
+                    <i class="fas fa-robot display-1 opacity-75"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="container my-5">
-        <h1 class="text-center mb-4">AI Interview Question Generator & Evaluator</h1>
-        
-        <div id="subject-form" class="card p-4 shadow-sm mb-4">
-            <form id="generate-form">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <!-- Features Section -->
+        <div class="row mb-5">
+            <div class="col-12 text-center mb-5">
+                <h2 class="display-5 fw-bold">Why Choose Our Platform?</h2>
+                <p class="lead text-muted">Everything you need to ace your next interview</p>
+            </div>
+            
+            <div class="col-md-4 mb-4">
+                <div class="card h-100 text-center border-0 shadow-sm">
+                    <div class="card-body p-4">
+                        <div class="mb-3">
+                            <i class="fas fa-brain fa-3x text-primary"></i>
+                        </div>
+                        <h5 class="card-title">AI-Generated Questions</h5>
+                        <p class="card-text text-muted">
+                            Get personalized interview questions generated by advanced AI based on your chosen subject and difficulty level.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4 mb-4">
+                <div class="card h-100 text-center border-0 shadow-sm">
+                    <div class="card-body p-4">
+                        <div class="mb-3">
+                            <i class="fas fa-search fa-3x text-success"></i>
+                        </div>
+                        <h5 class="card-title">Intelligent Evaluation</h5>
+                        <p class="card-text text-muted">
+                            Receive detailed feedback, scores, and model answers for each of your responses using AI evaluation.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4 mb-4">
+                <div class="card h-100 text-center border-0 shadow-sm">
+                    <div class="card-body p-4">
+                        <div class="mb-3">
+                            <i class="fas fa-chart-line fa-3x text-info"></i>
+                        </div>
+                        <h5 class="card-title">Progress Tracking</h5>
+                        <p class="card-text text-muted">
+                            Monitor your improvement with detailed analytics, performance charts, and comprehensive reports.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Subject Areas -->
+        <div class="row mb-5">
+            <div class="col-12 text-center mb-4">
+                <h3 class="fw-bold">Popular Subject Areas</h3>
+                <p class="text-muted">Practice with questions from various technical domains</p>
+            </div>
+            
+            <div class="col-lg-10 mx-auto">
+                <div class="row g-3">
+                    <div class="col-md-4 col-sm-6">
+                        <div class="card bg-light border-0 text-center">
+                            <div class="card-body py-3">
+                                <i class="fab fa-python text-warning me-2"></i>
+                                <strong>Python Programming</strong>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 col-sm-6">
+                        <div class="card bg-light border-0 text-center">
+                            <div class="card-body py-3">
+                                <i class="fab fa-js-square text-warning me-2"></i>
+                                <strong>JavaScript</strong>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 col-sm-6">
+                        <div class="card bg-light border-0 text-center">
+                            <div class="card-body py-3">
+                                <i class="fas fa-robot text-info me-2"></i>
+                                <strong>Machine Learning</strong>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 col-sm-6">
+                        <div class="card bg-light border-0 text-center">
+                            <div class="card-body py-3">
+                                <i class="fas fa-database text-success me-2"></i>
+                                <strong>Database Management</strong>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 col-sm-6">
+                        <div class="card bg-light border-0 text-center">
+                            <div class="card-body py-3">
+                                <i class="fas fa-sitemap text-primary me-2"></i>
+                                <strong>System Design</strong>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 col-sm-6">
+                        <div class="card bg-light border-0 text-center">
+                            <div class="card-body py-3">
+                                <i class="fas fa-cogs text-secondary me-2"></i>
+                                <strong>DevOps</strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- How It Works -->
+        <div class="row mb-5">
+            <div class="col-12 text-center mb-4">
+                <h3 class="fw-bold">How It Works</h3>
+                <p class="text-muted">Simple steps to improve your interview skills</p>
+            </div>
+            
+            <div class="col-md-3 text-center mb-4">
                 <div class="mb-3">
-                    <label for="subject" class="form-label">Enter a subject for interview questions:</label>
-                    <input type="text" class="form-control" id="subject" name="subject" placeholder="e.g., DBMS, Python, Machine Learning" required>
+                    <div class="bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                        <span class="fw-bold fs-4">1</span>
+                    </div>
+                </div>
+                <h6>Choose Subject & Difficulty</h6>
+                <p class="text-muted small">Select your topic and skill level</p>
+            </div>
+            
+            <div class="col-md-3 text-center mb-4">
+                <div class="mb-3">
+                    <div class="bg-success text-white rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                        <span class="fw-bold fs-4">2</span>
+                    </div>
+                </div>
+                <h6>Generate Questions</h6>
+                <p class="text-muted small">AI creates personalized questions</p>
+            </div>
+            
+            <div class="col-md-3 text-center mb-4">
+                <div class="mb-3">
+                    <div class="bg-info text-white rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                        <span class="fw-bold fs-4">3</span>
+                    </div>
+                </div>
+                <h6>Answer Questions</h6>
+                <p class="text-muted small">Provide your best responses</p>
+            </div>
+            
+            <div class="col-md-3 text-center mb-4">
+                <div class="mb-3">
+                    <div class="bg-warning text-white rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                        <span class="fw-bold fs-4">4</span>
+                    </div>
+                </div>
+                <h6>Get Feedback</h6>
+                <p class="text-muted small">Receive detailed evaluation</p>
+            </div>
+        </div>
+
+        <!-- Call to Action -->
+        {% if not current_user.is_authenticated %}
+        <div class="row">
+            <div class="col-lg-8 mx-auto text-center">
+                <div class="card bg-light border-0">
+                    <div class="card-body py-5">
+                        <h3 class="fw-bold mb-3">Ready to Improve Your Interview Skills?</h3>
+                        <p class="text-muted mb-4">Join thousands of users who have improved their interview performance with our AI-powered platform.</p>
+                        <div class="d-flex justify-content-center gap-3">
+                            <a href="{{ url_for('auth.register') }}" class="btn btn-primary btn-lg">
+                                <i class="fas fa-rocket me-2"></i>Start Free Today
+                            </a>
+                            <a href="{{ url_for('auth.login') }}" class="btn btn-outline-primary btn-lg">
+                                <i class="fas fa-sign-in-alt me-2"></i>Login
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white py-4 mt-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <h6>AI Interview Question Generator</h6>
+                    <p class="text-muted small">Powered by advanced AI technology to help you ace your interviews.</p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <div class="d-flex justify-content-md-end gap-3">
+                        {% if current_user.is_authenticated %}
+                            <a href="{{ url_for('dashboard') }}" class="text-light text-decoration-none">Dashboard</a>
+                            <a href="{{ url_for('quiz') }}" class="text-light text-decoration-none">Practice</a>
+                            <a href="{{ url_for('leaderboard') }}" class="text-light text-decoration-none">Leaderboard</a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://kit.fontawesome.com/your-fontawesome-kit.js" crossorigin="anonymous"></script>
+    
+    <script>
+        // Theme toggle functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const themeToggle = document.getElementById('themeToggle');
+            const themeIcon = document.getElementById('themeIcon');
+            
+            if (themeToggle && themeIcon) {
+                // Load saved theme
+                const savedTheme = localStorage.getItem('theme') || 'light';
+                document.documentElement.setAttribute('data-theme', savedTheme);
+                updateThemeIcon(savedTheme);
+                
+                themeToggle.addEventListener('click', function() {
+                    const currentTheme = document.documentElement.getAttribute('data-theme');
+                    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+                    
+                    document.documentElement.setAttribute('data-theme', newTheme);
+                    localStorage.setItem('theme', newTheme);
+                    updateThemeIcon(newTheme);
+                    
+                    // Send theme update to server if logged in
+                    if ({{ 'true' if current_user.is_authenticated else 'false' }}) {
+                        fetch('/api/theme', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({theme: newTheme})
+                        });
+                    }
+                });
+            }
+        });
+
+        function updateThemeIcon(theme) {
+            const themeIcon = document.getElementById('themeIcon');
+            if (themeIcon) {
+                themeIcon.textContent = theme === 'dark' ? '☀️' : '🌙';
+            }
+        }
+    </script>
+</body>
+</html>
+            <form id="generate-form">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="subject" class="form-label">Select a subject for interview questions:</label>
+                        <select class="form-select" id="subject" name="subject" required>
+                            <option value="" disabled selected>Choose a subject</option>
+                            <option value="Python Programming">Python Programming</option>
+                            <option value="Java Programming">Java Programming</option>
+                            <option value="JavaScript">JavaScript</option>
+                            <option value="Database Management">Database Management</option>
+                            <option value="SQL">SQL</option>
+                            <option value="Data Structures">Data Structures</option>
+                            <option value="Algorithms">Algorithms</option>
+                            <option value="Machine Learning">Machine Learning</option>
+                            <option value="Web Development">Web Development</option>
+                            <option value="DevOps">DevOps</option>
+                            <option value="Cloud Computing">Cloud Computing</option>
+                            <option value="Software Engineering">Software Engineering</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="difficulty" class="form-label">Select difficulty level:</label>
+                        <div class="d-flex">
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="difficulty" id="easy" value="Easy" checked>
+                                <label class="form-check-label" for="easy">Easy</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="difficulty" id="medium" value="Medium">
+                                <label class="form-check-label" for="medium">Medium</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="difficulty" id="hard" value="Hard">
+                                <label class="form-check-label" for="hard">Hard</label>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 <button type="submit" class="btn btn-primary">Generate Questions</button>
             </form>
@@ -33,11 +417,19 @@
             <p class="text-muted mb-4">Answer the following questions to test your knowledge:</p>
             
             <form id="answers-form">
+                <input type="hidden" id="subject-hidden" name="subject">
+                <input type="hidden" id="difficulty-hidden" name="difficulty">
                 <div id="questions-container">
                     <!-- Questions will be dynamically added here -->
                 </div>
                 
-                <button type="submit" class="btn btn-success mt-4">Submit Answers for Evaluation</button>
+                <div class="d-flex justify-content-between mt-4">
+                    <div>
+                        <button type="button" id="refresh-questions" class="btn btn-secondary me-2">Refresh Questions</button>
+                        <button type="button" id="load-more-questions" class="btn btn-info">Load 5 More Questions</button>
+                    </div>
+                    <button type="submit" class="btn btn-success">Submit Answers for Evaluation</button>
+                </div>
             </form>
         </div>
         
@@ -84,7 +476,13 @@
                 e.preventDefault();
                 
                 const subject = document.getElementById('subject').value.trim();
+                const difficulty = document.querySelector('input[name="difficulty"]:checked').value;
+                
                 if (!subject) return;
+                
+                // Set hidden fields
+                document.getElementById('subject-hidden').value = subject;
+                document.getElementById('difficulty-hidden').value = difficulty;
                 
                 // Show loading
                 loading.classList.remove('d-none');
@@ -97,7 +495,8 @@
                         'Content-Type': 'application/x-www-form-urlencoded',
                     },
                     body: new URLSearchParams({
-                        'subject': subject
+                        'subject': subject,
+                        'difficulty': difficulty
                     })
                 })
                 .then(response => response.json())
@@ -152,7 +551,7 @@
                 evalLoading.classList.remove('d-none');
                 errorMessage.classList.add('d-none');
                 
-                // Collect all answers
+                // Collect all form data
                 const formData = new FormData(answersForm);
                 
                 // Send request to evaluate answers
@@ -198,10 +597,30 @@
                                 <h6>Question:</h6>
                                 <p>${item.question}</p>
                                 
-                                <h6>Your Answer:</h6>
-                                <p>${item.answer}</p>
+                                <div class="row mt-4">
+                                    <div class="col-md-6">
+                                        <div class="card bg-light">
+                                            <div class="card-header">
+                                                <h6 class="mb-0">Your Answer:</h6>
+                                            </div>
+                                            <div class="card-body">
+                                                <p>${item.answer}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="card bg-light">
+                                            <div class="card-header">
+                                                <h6 class="mb-0">Model Answer:</h6>
+                                            </div>
+                                            <div class="card-body">
+                                                <p>${item.model_answer || 'No model answer available.'}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                                 
-                                <h6>Feedback:</h6>
+                                <h6 class="mt-4">Feedback:</h6>
                                 <p>${item.evaluation.feedback}</p>
                                 
                                 <div class="d-flex align-items-center">
@@ -245,6 +664,127 @@
                 resultsSection.classList.add('d-none');
                 subjectForm.classList.remove('d-none');
                 document.getElementById('subject').value = '';
+            });
+
+            // Refresh questions button
+            document.getElementById('refresh-questions').addEventListener('click', function() {
+                const subject = document.getElementById('subject-hidden').value;
+                const difficulty = document.getElementById('difficulty-hidden').value;
+
+                // Show loading
+                loading.classList.remove('d-none');
+                
+                // Send request to refresh questions
+                fetch('/generate_questions', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: new URLSearchParams({
+                        'subject': subject,
+                        'difficulty': difficulty,
+                        'refresh': 'true'
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    loading.classList.add('d-none');
+                    
+                    if (data.error) {
+                        errorMessage.textContent = data.error;
+                        errorMessage.classList.remove('d-none');
+                        return;
+                    }
+                    
+                    // Display questions
+                    const questionsContainer = document.getElementById('questions-container');
+                    questionsContainer.innerHTML = '';
+                    
+                    data.questions.forEach((question, index) => {
+                        const questionCard = document.createElement('div');
+                        questionCard.className = 'card mb-4 shadow-sm';
+                        questionCard.innerHTML = `
+                            <div class="card-header bg-light">
+                                <h5 class="card-title mb-0">Question ${index + 1}</h5>
+                            </div>
+                            <div class="card-body">
+                                <p class="card-text">${question}</p>
+                                <div class="form-group">
+                                    <label for="answer-${index}" class="form-label">Your Answer:</label>
+                                    <textarea class="form-control" id="answer-${index}" name="answers[]" rows="3" required></textarea>
+                                </div>
+                            </div>
+                        `;
+                        questionsContainer.appendChild(questionCard);
+                    });
+                })
+                .catch(error => {
+                    loading.classList.add('d-none');
+                    errorMessage.textContent = 'An error occurred. Please try again.';
+                    errorMessage.classList.remove('d-none');
+                    console.error('Error:', error);
+                });
+            });
+
+            // Load more questions button
+            document.getElementById('load-more-questions').addEventListener('click', function() {
+                const subject = document.getElementById('subject-hidden').value;
+                const difficulty = document.getElementById('difficulty-hidden').value;
+
+                // Show loading
+                loading.classList.remove('d-none');
+                
+                // Send request to get more questions
+                fetch('/generate_questions', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: new URLSearchParams({
+                        'subject': subject,
+                        'difficulty': difficulty,
+                        'add_more': 'true'
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    loading.classList.add('d-none');
+                    
+                    if (data.error) {
+                        errorMessage.textContent = data.error;
+                        errorMessage.classList.remove('d-none');
+                        return;
+                    }
+                    
+                    // Get current number of questions
+                    const questionsContainer = document.getElementById('questions-container');
+                    const currentCount = questionsContainer.children.length;
+                    
+                    // Append new questions
+                    data.questions.forEach((question, index) => {
+                        const questionCard = document.createElement('div');
+                        questionCard.className = 'card mb-4 shadow-sm';
+                        questionCard.innerHTML = `
+                            <div class="card-header bg-light">
+                                <h5 class="card-title mb-0">Question ${currentCount + index + 1}</h5>
+                            </div>
+                            <div class="card-body">
+                                <p class="card-text">${question}</p>
+                                <div class="form-group">
+                                    <label for="answer-${currentCount + index}" class="form-label">Your Answer:</label>
+                                    <textarea class="form-control" id="answer-${currentCount + index}" name="answers[]" rows="3" required></textarea>
+                                </div>
+                            </div>
+                        `;
+                        questionsContainer.appendChild(questionCard);
+                    });
+                })
+                .catch(error => {
+                    loading.classList.add('d-none');
+                    errorMessage.textContent = 'An error occurred. Please try again.';
+                    errorMessage.classList.remove('d-none');
+                    console.error('Error:', error);
+                });
             });
         });
     </script>

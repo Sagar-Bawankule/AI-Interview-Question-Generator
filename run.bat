@@ -14,6 +14,16 @@ if not exist venv (
     call venv\Scripts\activate
 )
 
+:: Create database directory if it doesn't exist
+if not exist instance (
+    mkdir instance
+    echo Created instance directory for database
+)
+
+:: Initialize the database
+echo Initializing the database...
+python init_db.py
+
 :: Run the application
 echo Starting Flask application...
 python app.py

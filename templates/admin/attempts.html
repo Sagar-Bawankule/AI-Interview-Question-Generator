@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Attempts - Admin Panel</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="{{ url_for('index') }}">
+                <i class="fas fa-shield-alt me-2"></i>Admin Panel
+            </a>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('admin.dashboard') }}">Dashboard</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('admin.users') }}">Users</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="{{ url_for('admin.attempts') }}">Attempts</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid my-4">
+        <h1><i class="fas fa-clipboard-list text-primary me-2"></i>Quiz Attempts</h1>
+        
+        <div class="card shadow">
+            <div class="card-body p-0">
+                {% if attempts %}
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>ID</th>
+                                    <th>User</th>
+                                    <th>Subject</th>
+                                    <th>Difficulty</th>
+                                    <th>Score</th>
+                                    <th>Date</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for attempt in attempts %}
+                                <tr>
+                                    <td>{{ attempt.id }}</td>
+                                    <td>{{ attempt.user.username }}</td>
+                                    <td><span class="badge bg-secondary">{{ attempt.subject }}</span></td>
+                                    <td><span class="badge bg-info">{{ attempt.difficulty }}</span></td>
+                                    <td>
+                                        <span class="badge bg-{% if attempt.average_score >= 80 %}success{% elif attempt.average_score >= 60 %}warning{% else %}danger{% endif %}">
+                                            {{ "%.1f"|format(attempt.average_score) }}%
+                                        </span>
+                                    </td>
+                                    <td>{{ attempt.timestamp.strftime('%d %b, %Y %H:%M') }}</td>
+                                    <td>
+                                        <a href="{{ url_for('attempt', attempt_id=attempt.id) }}" class="btn btn-outline-primary btn-sm">
+                                            <i class="fas fa-eye"></i> View
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-clipboard-list fa-3x text-muted mb-3"></i>
+                        <h4 class="text-muted">No Attempts Found</h4>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz - AI Interview Question Generator</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="{{ url_for('index') }}">AI Interview Question Generator</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('dashboard') }}">Dashboard</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="{{ url_for('index') }}">Practice</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('leaderboard') }}">Leaderboard</a>
+                    </li>
+                    {% if current_user.is_admin %}
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="adminDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            Admin
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="adminDropdown">
+                            <li><a class="dropdown-item" href="{{ url_for('admin.dashboard') }}">Admin Dashboard</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('admin.users') }}">Manage Users</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('admin.attempts') }}">View Attempts</a></li>
+                        </ul>
+                    </li>
+                    {% endif %}
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            {{ current_user.username }}
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="userDropdown">
+                            <li><a class="dropdown-item" href="{{ url_for('auth.profile') }}">Profile</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="{{ url_for('auth.logout') }}">Logout</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item">
+                        <button class="btn btn-outline-light btn-sm ms-2" id="themeToggle">
+                            <span id="themeIcon">🌙</span>
+                        </button>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container my-5">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <div class="row">
+            <div class="col-lg-8 mx-auto">
+                <div class="card shadow">
+                    <div class="card-header bg-primary text-white">
+                        <h3 class="card-title mb-0">
+                            <i class="fas fa-question-circle me-2"></i>
+                            AI Interview Practice
+                        </h3>
+                    </div>
+                    <div class="card-body">
+                        <!-- Quiz Configuration -->
+                        <div id="quizConfig" class="mb-4">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="subject" class="form-label">Subject:</label>
+                                    <select class="form-select" id="subject" required>
+                                        <option value="">Select a subject</option>
+                                        <option value="Python Programming">Python Programming</option>
+                                        <option value="JavaScript">JavaScript</option>
+                                        <option value="Machine Learning">Machine Learning</option>
+                                        <option value="Data Science">Data Science</option>
+                                        <option value="Web Development">Web Development</option>
+                                        <option value="Database Management">Database Management</option>
+                                        <option value="System Design">System Design</option>
+                                        <option value="Algorithms">Algorithms</option>
+                                        <option value="Software Engineering">Software Engineering</option>
+                                        <option value="DevOps">DevOps</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="difficulty" class="form-label">Difficulty:</label>
+                                    <select class="form-select" id="difficulty" required>
+                                        <option value="">Select difficulty</option>
+                                        <option value="Beginner">Beginner</option>
+                                        <option value="Intermediate">Intermediate</option>
+                                        <option value="Advanced">Advanced</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="numQuestions" class="form-label">Number of Questions:</label>
+                                    <select class="form-select" id="numQuestions" required>
+                                        <option value="5">5 Questions</option>
+                                        <option value="10" selected>10 Questions</option>
+                                        <option value="15">15 Questions</option>
+                                        <option value="20">20 Questions</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="language" class="form-label">Language:</label>
+                                    <select class="form-select" id="language">
+                                        <option value="en" selected>English</option>
+                                        <option value="hi">Hindi (हिंदी)</option>
+                                        <option value="mr">Marathi (मराठी)</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="d-grid gap-2">
+                                <button class="btn btn-primary btn-lg" onclick="generateQuestions()">
+                                    <i class="fas fa-cogs me-2"></i>Generate Questions
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Questions Display -->
+                        <div id="questionsSection" style="display: none;">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h4>Interview Questions</h4>
+                                <div class="btn-group" role="group">
+                                    <button class="btn btn-outline-secondary btn-sm" onclick="downloadQuestionsPDF()">
+                                        <i class="fas fa-download me-1"></i>Download PDF
+                                    </button>
+                                    <button class="btn btn-outline-primary btn-sm" onclick="refreshQuestions()">
+                                        <i class="fas fa-sync-alt me-1"></i>Refresh Questions
+                                    </button>
+                                    <button class="btn btn-outline-info btn-sm" onclick="loadMoreQuestions()">
+                                        <i class="fas fa-plus me-1"></i>Load 5 More
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div id="questionsList"></div>
+                            
+                            <div class="mt-4">
+                                <div class="d-grid gap-2">
+                                    <button class="btn btn-success btn-lg" onclick="submitAnswers()">
+                                        <i class="fas fa-check me-2"></i>Submit Answers for Evaluation
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Loading Spinner -->
+                        <div id="loadingSpinner" class="text-center" style="display: none;">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                            <p class="mt-2">Generating questions using AI...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Session Timeout Modal -->
+    <div class="modal fade" id="sessionTimeoutModal" tabindex="-1" aria-labelledby="sessionTimeoutModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="sessionTimeoutModalLabel">Session Timeout</h5>
+                </div>
+                <div class="modal-body">
+                    Your session is about to expire due to inactivity. You will be automatically logged out in <span id="countdown">60</span> seconds.
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" onclick="extendSession()">Stay Logged In</button>
+                    <button type="button" class="btn btn-secondary" onclick="logoutNow()">Logout Now</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://kit.fontawesome.com/your-fontawesome-kit.js" crossorigin="anonymous"></script>
+    
+    <script>
+        let currentQuestions = [];
+        let sessionTimeoutTimer;
+        let countdownTimer;
+
+        // Theme toggle functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const themeToggle = document.getElementById('themeToggle');
+            const themeIcon = document.getElementById('themeIcon');
+            
+            // Load saved theme
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+            updateThemeIcon(savedTheme);
+            
+            themeToggle.addEventListener('click', function() {
+                const currentTheme = document.documentElement.getAttribute('data-theme');
+                const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+                
+                document.documentElement.setAttribute('data-theme', newTheme);
+                localStorage.setItem('theme', newTheme);
+                updateThemeIcon(newTheme);
+                
+                // Send theme update to server
+                fetch('/api/theme', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({theme: newTheme})
+                });
+            });
+            
+            // Initialize session timeout
+            initSessionTimeout();
+        });
+
+        function updateThemeIcon(theme) {
+            const themeIcon = document.getElementById('themeIcon');
+            themeIcon.textContent = theme === 'dark' ? '☀️' : '🌙';
+        }
+
+        function generateQuestions() {
+            const subject = document.getElementById('subject').value;
+            const difficulty = document.getElementById('difficulty').value;
+            const numQuestions = document.getElementById('numQuestions').value;
+            const language = document.getElementById('language').value;
+
+            if (!subject || !difficulty) {
+                alert('Please select both subject and difficulty level.');
+                return;
+            }
+
+            // Show loading spinner
+            document.getElementById('loadingSpinner').style.display = 'block';
+            document.getElementById('questionsSection').style.display = 'none';
+
+            const requestData = {
+                subject: subject,
+                difficulty: difficulty,
+                num_questions: parseInt(numQuestions),
+                language: language
+            };
+
+            fetch('/generate_questions', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(requestData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('loadingSpinner').style.display = 'none';
+                if (data.success) {
+                    currentQuestions = data.questions;
+                    displayQuestions(data.questions);
+                    document.getElementById('questionsSection').style.display = 'block';
+                } else {
+                    alert('Error generating questions: ' + data.error);
+                }
+            })
+            .catch(error => {
+                document.getElementById('loadingSpinner').style.display = 'none';
+                console.error('Error:', error);
+                alert('An error occurred while generating questions.');
+            });
+        }
+
+        function refreshQuestions() {
+            generateQuestions();
+        }
+
+        function loadMoreQuestions() {
+            const subject = document.getElementById('subject').value;
+            const difficulty = document.getElementById('difficulty').value;
+            const language = document.getElementById('language').value;
+
+            if (!subject || !difficulty) {
+                alert('Please generate initial questions first.');
+                return;
+            }
+
+            document.getElementById('loadingSpinner').style.display = 'block';
+
+            const requestData = {
+                subject: subject,
+                difficulty: difficulty,
+                num_questions: 5,
+                language: language,
+                append: true
+            };
+
+            fetch('/generate_questions', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(requestData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('loadingSpinner').style.display = 'none';
+                if (data.success) {
+                    currentQuestions = currentQuestions.concat(data.questions);
+                    displayQuestions(currentQuestions);
+                } else {
+                    alert('Error loading more questions: ' + data.error);
+                }
+            })
+            .catch(error => {
+                document.getElementById('loadingSpinner').style.display = 'none';
+                console.error('Error:', error);
+                alert('An error occurred while loading more questions.');
+            });
+        }
+
+        function displayQuestions(questions) {
+            const questionsList = document.getElementById('questionsList');
+            questionsList.innerHTML = '';
+
+            questions.forEach((question, index) => {
+                const questionDiv = document.createElement('div');
+                questionDiv.className = 'card mb-3';
+                questionDiv.innerHTML = `
+                    <div class="card-body">
+                        <h5 class="card-title">Question ${index + 1}</h5>
+                        <p class="card-text">${question}</p>
+                        <textarea class="form-control" id="answer_${index}" rows="4" 
+                                  placeholder="Enter your answer here..."></textarea>
+                    </div>
+                `;
+                questionsList.appendChild(questionDiv);
+            });
+        }
+
+        function downloadQuestionsPDF() {
+            if (currentQuestions.length === 0) {
+                alert('Please generate questions first.');
+                return;
+            }
+
+            const requestData = {
+                questions: currentQuestions,
+                subject: document.getElementById('subject').value,
+                difficulty: document.getElementById('difficulty').value
+            };
+
+            fetch('/download/questions-pdf', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(requestData)
+            })
+            .then(response => response.blob())
+            .then(blob => {
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.style.display = 'none';
+                a.href = url;
+                a.download = 'interview_questions.pdf';
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while downloading the PDF.');
+            });
+        }
+
+        function submitAnswers() {
+            if (currentQuestions.length === 0) {
+                alert('Please generate questions first.');
+                return;
+            }
+
+            const answers = [];
+            for (let i = 0; i < currentQuestions.length; i++) {
+                const answerElement = document.getElementById(`answer_${i}`);
+                if (answerElement) {
+                    answers.push(answerElement.value.trim());
+                }
+            }
+
+            if (answers.some(answer => answer === '')) {
+                if (!confirm('Some answers are empty. Do you want to submit anyway?')) {
+                    return;
+                }
+            }
+
+            document.getElementById('loadingSpinner').style.display = 'block';
+
+            const requestData = {
+                questions: currentQuestions,
+                answers: answers,
+                subject: document.getElementById('subject').value,
+                difficulty: document.getElementById('difficulty').value
+            };
+
+            fetch('/evaluate_answers', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(requestData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('loadingSpinner').style.display = 'none';
+                if (data.success) {
+                    alert('Answers evaluated successfully! Redirecting to results...');
+                    window.location.href = `/attempt/${data.attempt_id}`;
+                } else {
+                    alert('Error evaluating answers: ' + (data.error || 'Unknown error'));
+                }
+            })
+            .catch(error => {
+                document.getElementById('loadingSpinner').style.display = 'none';
+                console.error('Error:', error);
+                alert('An error occurred while evaluating answers.');
+            });
+        }
+
+        // Session timeout management
+        function initSessionTimeout() {
+            let inactivityTime = 0;
+            const maxInactivity = 15 * 60 * 1000; // 15 minutes in milliseconds
+            const warningTime = 13 * 60 * 1000; // Show warning at 13 minutes
+
+            function resetTimer() {
+                inactivityTime = 0;
+            }
+
+            function checkInactivity() {
+                inactivityTime += 1000;
+                if (inactivityTime >= warningTime && inactivityTime < maxInactivity) {
+                    showSessionWarning();
+                } else if (inactivityTime >= maxInactivity) {
+                    logoutNow();
+                }
+            }
+
+            // Reset timer on user activity
+            document.addEventListener('mousemove', resetTimer);
+            document.addEventListener('keypress', resetTimer);
+            document.addEventListener('click', resetTimer);
+
+            // Check inactivity every second
+            setInterval(checkInactivity, 1000);
+        }
+
+        function showSessionWarning() {
+            const modal = new bootstrap.Modal(document.getElementById('sessionTimeoutModal'));
+            modal.show();
+            
+            let countdown = 60;
+            countdownTimer = setInterval(() => {
+                countdown--;
+                document.getElementById('countdown').textContent = countdown;
+                if (countdown <= 0) {
+                    clearInterval(countdownTimer);
+                    logoutNow();
+                }
+            }, 1000);
+        }
+
+        function extendSession() {
+            clearInterval(countdownTimer);
+            const modal = bootstrap.Modal.getInstance(document.getElementById('sessionTimeoutModal'));
+            modal.hide();
+            
+            // Reset session timer by making a request to the server
+            fetch('/dashboard', {method: 'GET'});
+        }
+
+        function logoutNow() {
+            clearInterval(countdownTimer);
+            window.location.href = '/auth/logout';
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="{{ session.get('theme', 'light') }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - AI Interview Question Generator</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="{{ url_for('dashboard') }}">
+                <i class="bi bi-brain"></i> AI Interview Generator
+            </a>
+            
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="{{ url_for('dashboard') }}">
+                            <i class="bi bi-speedometer2"></i> Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('quiz') }}">
+                            <i class="bi bi-question-circle"></i> Take Quiz
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('leaderboard') }}">
+                            <i class="bi bi-trophy"></i> Leaderboard
+                        </a>
+                    </li>
+                    {% if current_user.is_admin %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('admin.dashboard') }}">
+                            <i class="bi bi-gear"></i> Admin
+                        </a>
+                    </li>
+                    {% endif %}
+                </ul>
+                
+                <ul class="navbar-nav">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="bi bi-person-circle"></i> {{ current_user.username }}
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{{ url_for('auth.profile') }}">
+                                <i class="bi bi-person"></i> Profile
+                            </a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="{{ url_for('auth.logout') }}">
+                                <i class="bi bi-box-arrow-right"></i> Logout
+                            </a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item">
+                        <button class="btn btn-outline-light btn-sm ms-2" id="themeToggle">
+                            <i class="bi bi-moon-fill" id="themeIcon"></i>
+                        </button>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container my-4">
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <!-- Welcome Section -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card bg-gradient-primary text-white">
+                    <div class="card-body">
+                        <h1 class="card-title">
+                            <i class="bi bi-person-check"></i> Welcome back, {{ current_user.username }}!
+                        </h1>
+                        <p class="card-text">Ready to improve your interview skills? Start a new quiz or review your progress below.</p>
+                        <a href="{{ url_for('quiz') }}" class="btn btn-light btn-lg">
+                            <i class="bi bi-play-circle"></i> Start New Quiz
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Statistics Cards -->
+        <div class="row mb-4">
+            <div class="col-md-4">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <div class="display-4 text-primary">
+                            <i class="bi bi-clipboard-check"></i>
+                        </div>
+                        <h5 class="card-title">Total Attempts</h5>
+                        <h2 class="display-4">{{ stats.total_attempts }}</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <div class="display-4 text-success">
+                            <i class="bi bi-question-circle"></i>
+                        </div>
+                        <h5 class="card-title">Total Questions</h5>
+                        <h2 class="display-4">{{ stats.total_questions }}</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <div class="display-4 text-warning">
+                            <i class="bi bi-star-fill"></i>
+                        </div>
+                        <h5 class="card-title">Average Score</h5>
+                        <h2 class="display-4">{{ "%.1f"|format(stats.average_score) }}</h2>
+                        <small class="text-muted">out of 5.0</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Section -->
+        {% if score_data.dates %}
+        <div class="row mb-4">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="bi bi-graph-up"></i> Performance Over Time
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="performanceChart" height="100"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="bi bi-pie-chart"></i> Subject Distribution
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="subjectChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Recent Attempts -->
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-clock-history"></i> Recent Quiz Attempts
+                </h5>
+                {% if attempts %}
+                <small class="text-muted">{{ attempts|length }} total attempts</small>
+                {% endif %}
+            </div>
+            <div class="card-body">
+                {% if attempts %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Subject</th>
+                                <th>Difficulty</th>
+                                <th>Date</th>
+                                <th>Score</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for attempt in attempts[:10] %}
+                            <tr>
+                                <td>
+                                    <span class="badge bg-primary">{{ attempt.subject }}</span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-{{ 'success' if attempt.difficulty == 'Easy' else 'warning' if attempt.difficulty == 'Medium' else 'danger' }}">
+                                        {{ attempt.difficulty }}
+                                    </span>
+                                </td>
+                                <td>{{ attempt.timestamp.strftime('%Y-%m-%d %H:%M') }}</td>
+                                <td>
+                                    <div class="progress" style="width: 100px;">
+                                        <div class="progress-bar bg-{{ 'success' if attempt.average_score >= 4 else 'warning' if attempt.average_score >= 2 else 'danger' }}" 
+                                             style="width: {{ (attempt.average_score / 5) * 100 }}%">
+                                            {{ "%.1f"|format(attempt.average_score) }}/5
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <a href="{{ url_for('view_attempt', attempt_id=attempt.id) }}" 
+                                       class="btn btn-sm btn-outline-primary">
+                                        <i class="bi bi-eye"></i> View
+                                    </a>
+                                    <a href="{{ url_for('download_evaluation_pdf', attempt_id=attempt.id) }}" 
+                                       class="btn btn-sm btn-outline-secondary">
+                                        <i class="bi bi-download"></i> PDF
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center py-5">
+                    <div class="display-1 text-muted">
+                        <i class="bi bi-clipboard-x"></i>
+                    </div>
+                    <h4>No quiz attempts yet</h4>
+                    <p class="text-muted">Start your first quiz to see your progress here!</p>
+                    <a href="{{ url_for('quiz') }}" class="btn btn-primary">
+                        <i class="bi bi-play-circle"></i> Take Your First Quiz
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-light py-4 mt-5">
+        <div class="container text-center">
+            <p class="text-muted mb-0">
+                <i class="bi bi-brain"></i> AI Interview Question Generator & Evaluator &copy; 2025
+            </p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // Theme toggle functionality
+        const themeToggle = document.getElementById('themeToggle');
+        const themeIcon = document.getElementById('themeIcon');
+        const htmlElement = document.documentElement;
+
+        themeToggle.addEventListener('click', function() {
+            const currentTheme = htmlElement.getAttribute('data-bs-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            
+            htmlElement.setAttribute('data-bs-theme', newTheme);
+            themeIcon.className = newTheme === 'dark' ? 'bi bi-sun-fill' : 'bi bi-moon-fill';
+            
+            // Save theme preference
+            fetch('/api/theme', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({theme: newTheme})
+            });
+        });
+
+        // Initialize theme icon
+        const currentTheme = htmlElement.getAttribute('data-bs-theme');
+        themeIcon.className = currentTheme === 'dark' ? 'bi bi-sun-fill' : 'bi bi-moon-fill';
+
+        {% if score_data.dates %}
+        // Performance Chart
+        const performanceCtx = document.getElementById('performanceChart').getContext('2d');
+        new Chart(performanceCtx, {
+            type: 'line',
+            data: {
+                labels: {{ score_data.dates | tojson }},
+                datasets: [{
+                    label: 'Average Score',
+                    data: {{ score_data.scores | tojson }},
+                    borderColor: 'rgb(75, 192, 192)',
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    tension: 0.1
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 5
+                    }
+                }
+            }
+        });
+
+        {% if subject_data.subjects %}
+        // Subject Distribution Chart
+        const subjectCtx = document.getElementById('subjectChart').getContext('2d');
+        new Chart(subjectCtx, {
+            type: 'doughnut',
+            data: {
+                labels: {{ subject_data.subjects | tojson }},
+                datasets: [{
+                    data: {{ subject_data.counts | tojson }},
+                    backgroundColor: [
+                        '#FF6384',
+                        '#36A2EB',
+                        '#FFCE56',
+                        '#4BC0C0',
+                        '#9966FF',
+                        '#FF9F40'
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true
+            }
+        });
+        {% endif %}
+        {% endif %}
+    </script>
+</body>
+</html>

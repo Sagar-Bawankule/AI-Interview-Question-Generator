@@ -1,6 +1,10 @@
 # AI Interview Question Generator & Evaluator
 
-A Flask web application that generates interview questions on any subject using AI, allows users to answer them, and then evaluates the responses using a language model.
+A comprehensive web application built with Flask that uses AI to generate interview questions and intelligently evaluate answers. Perfect for preparing for technical interviews across various subjects.
+
+![Python](https://img.shields.io/badge/Python-3.8+-blue.svg)
+![Flask](https://img.shields.io/badge/Flask-2.3+-green.svg)
+![License](https://img.shields.io/badge/License-MIT-yellow.svg)
 
 ## Features
 

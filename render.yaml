@@ -19,4 +19,10 @@ services:
         value: /tmp/models
       - key: RENDER
         value: true
+      - key: DATABASE_URL
+        sync: false  # You'll need to manually set this to your Supabase PostgreSQL connection string
+      - key: SUPABASE_URL
+        sync: false  # You'll set this manually in the Render dashboard
+      - key: SUPABASE_KEY
+        sync: false  # You'll set this manually in the Render dashboard
     plan: free

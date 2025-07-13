@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - AI Interview Question Generator</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="{{ url_for('index') }}">AI Interview Question Generator</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="{{ url_for('dashboard') }}">Dashboard</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('quiz') }}">Practice</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('auth.logout') }}">Logout</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container my-5">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        
+        <div class="row mb-4">
+            <div class="col-md-12">
+                <h1>Welcome, {{ current_user.username }}!</h1>
+                <p class="lead">Track your progress and improve your interview skills</p>
+            </div>
+        </div>
+        
+        <!-- Stats Cards -->
+        <div class="row mb-4">
+            <div class="col-md-4">
+                <div class="card text-white bg-primary mb-3">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">Total Questions</h5>
+                        <h2 class="display-4">{{ stats.total_questions }}</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card text-white bg-success mb-3">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">Average Score</h5>
+                        <h2 class="display-4">{{ stats.average_score|round(1) }}/5</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card text-white bg-info mb-3">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">Quiz Attempts</h5>
+                        <h2 class="display-4">{{ stats.total_attempts }}</h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Progress Charts -->
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-light">
+                        <h5 class="card-title mb-0">Score Progress</h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="scoreChart" width="400" height="300"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-light">
+                        <h5 class="card-title mb-0">Subject Distribution</h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="subjectChart" width="400" height="300"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Recent Attempts -->
+        <div class="card shadow-sm">
+            <div class="card-header bg-light">
+                <h5 class="card-title mb-0">Recent Quiz Attempts</h5>
+            </div>
+            <div class="card-body">
+                {% if attempts %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Subject</th>
+                                <th>Difficulty</th>
+                                <th>Score</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for attempt in attempts %}
+                            <tr>
+                                <td>{{ attempt.timestamp.strftime('%Y-%m-%d %H:%M') }}</td>
+                                <td>{{ attempt.subject }}</td>
+                                <td><span class="badge {% if attempt.difficulty == 'Easy' %}bg-success{% elif attempt.difficulty == 'Medium' %}bg-warning{% else %}bg-danger{% endif %}">{{ attempt.difficulty }}</span></td>
+                                <td>{{ attempt.average_score|round(1) }}/5</td>
+                                <td>
+                                    <a href="{{ url_for('view_attempt', attempt_id=attempt.id) }}" class="btn btn-sm btn-outline-primary">View Details</a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <p class="text-center my-4">No quiz attempts found. <a href="{{ url_for('index') }}">Start practicing now!</a></p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <footer class="bg-light py-3 mt-5">
+        <div class="container text-center">
+            <p class="text-muted mb-0">AI Interview Question Generator & Evaluator &copy; 2025</p>
+        </div>
+    </footer>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Score Progress Chart
+        const scoreCtx = document.getElementById('scoreChart').getContext('2d');
+        const scoreChart = new Chart(scoreCtx, {
+            type: 'line',
+            data: {
+                labels: {{ score_data.dates|tojson }},
+                datasets: [{
+                    label: 'Average Score',
+                    data: {{ score_data.scores|tojson }},
+                    backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 2,
+                    tension: 0.3
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 5
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: true
+                    }
+                }
+            }
+        });
+        
+        // Subject Distribution Chart
+        const subjectCtx = document.getElementById('subjectChart').getContext('2d');
+        const subjectChart = new Chart(subjectCtx, {
+            type: 'doughnut',
+            data: {
+                labels: {{ subject_data.subjects|tojson }},
+                datasets: [{
+                    data: {{ subject_data.counts|tojson }},
+                    backgroundColor: [
+                        'rgba(255, 99, 132, 0.7)',
+                        'rgba(54, 162, 235, 0.7)',
+                        'rgba(255, 206, 86, 0.7)',
+                        'rgba(75, 192, 192, 0.7)',
+                        'rgba(153, 102, 255, 0.7)',
+                        'rgba(255, 159, 64, 0.7)',
+                        'rgba(199, 199, 199, 0.7)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'right',
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
