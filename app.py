@@ -7,6 +7,7 @@ import platform
 import sys
 import time
 import traceback
+import re
 from models import db, User, QuizAttempt, QuestionAnswer
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
@@ -629,6 +630,9 @@ def generate_questions_template_based(subject, difficulty, num_questions=5):
 
 def generate_questions(subject, difficulty, num_questions=5, random_seed=None):
     """Generate interview questions based on subject and difficulty level"""
+    # Global declarations must be at the top
+    global hugging_face_generator
+    
     # Set random seed if provided (for reproducibility in tests)
     if random_seed is not None:
         import random
@@ -647,7 +651,6 @@ def generate_questions(subject, difficulty, num_questions=5, random_seed=None):
         return generate_questions._question_cache[cache_key][:num_questions]
     
     # Try Hugging Face models first if available
-    global hugging_face_generator
     if USE_MODELS and hugging_face_generator is not None:
         try:
             print(f"Generating questions with Hugging Face for {subject}, difficulty: {difficulty}")
@@ -666,101 +669,6 @@ def generate_questions(subject, difficulty, num_questions=5, random_seed=None):
     # Cache the results
     generate_questions._question_cache[cache_key] = questions
     return questions[:num_questions]
-            f"What are the basic principles of {subject}?",
-            f"What tools are commonly used in {subject}?",
-            f"What are some common use cases for {subject}?"
-        ],
-        "Intermediate": [
-            f"How do you solve complex problems using {subject}?",
-            f"What are the best practices in {subject}?",
-            f"How do you optimize performance in {subject}?",
-            f"What are the common challenges in {subject}?",
-            f"How do you debug issues in {subject}?"
-        ],
-        "Advanced": [
-            f"How do you architect scalable solutions using {subject}?",
-            f"What are the advanced techniques in {subject}?",
-            f"How do you handle enterprise-level {subject} implementations?",
-            f"What are the future trends in {subject}?",
-            f"How do you mentor others in {subject}?"
-        ]
-    }
-    
-    # Get questions for the specific subject and difficulty
-    if subject in templates and difficulty in templates[subject]:
-        questions = templates[subject][difficulty].copy()
-    else:
-        # Use generic templates
-        questions = generic_templates.get(difficulty, generic_templates["Intermediate"]).copy()
-        # Add more generic questions
-        questions.extend([
-            f"Describe a challenging project you worked on involving {subject}.",
-            f"How would you explain {subject} to a non-technical person?",
-            f"What resources do you recommend for learning {subject}?",
-            f"How has {subject} evolved in recent years?",
-            f"What are the career opportunities in {subject}?"
-        ])
-    
-    # Shuffle and return the requested number of questions
-    import random
-    random.shuffle(questions)
-    return questions[:num_questions]
-    """Generate interview questions based on subject and difficulty level using Hugging Face models"""
-    # Set random seed if provided (for reproducibility in tests)
-    if random_seed is not None:
-        random.seed(random_seed)
-    
-    # Create a cache key
-    cache_key = f"{subject.lower()}_{difficulty}_{num_questions}"
-    
-    # Check global cache
-    global _question_cache
-    if not hasattr(generate_questions, '_question_cache'):
-        generate_questions._question_cache = {}
-    
-    # Check if we have cached results
-    if cache_key in generate_questions._question_cache:
-        print(f"Using cached questions for {subject}, difficulty: {difficulty}")
-        return generate_questions._question_cache[cache_key][:num_questions]
-    
-    # Always try to use Hugging Face models first
-    global hugging_face_generator
-    if USE_MODELS and hugging_face_generator is not None:
-        try:
-            print(f"Generating questions with Hugging Face for {subject}, difficulty: {difficulty}")
-            questions = hugging_face_generator.generate_questions(subject, difficulty, num_questions)
-            if questions and len(questions) >= num_questions:
-                # Cache the results
-                generate_questions._question_cache[cache_key] = questions
-                return questions[:num_questions]
-        except Exception as e:
-            print(f"Hugging Face generation failed: {e}")
-    
-    # If Hugging Face fails, generate simple non-template questions
-    print("Falling back to basic generic questions")
-    basic_questions = [
-        f"What are the fundamental concepts in {subject}?",
-        f"Explain how {subject} is used in real-world applications.",
-        f"What are the key challenges when working with {subject}?",
-        f"How has {subject} evolved over time?",
-        f"Describe best practices when implementing {subject}."
-    ]
-    
-    # Make sure we have enough questions
-    while len(basic_questions) < num_questions:
-        basic_questions.append(f"Discuss an important aspect of {subject}.")
-    
-    return basic_questions[:num_questions]
-    
-    # Python questions section removed - using only Hugging Face models
-    # Filter out any questions that were previously shown to the user
-    filtered_questions = [q for q in questions if q not in previous_questions]
-    
-    # If we've filtered out too many, add back some from the original list
-    if len(filtered_questions) < count:
-        filtered_questions = questions[:count]
-    
-    return filtered_questions[:count]
 
 def generate_contextual_answer(question, subject, difficulty):
     """Generate an answer by analyzing the question context"""
@@ -884,9 +792,6 @@ def generate_model_answer(question, subject, difficulty):
     
     # Fall back to lightweight contextual answer generation
     return generate_contextual_answer(question, subject, difficulty)
-    
-
-
 
 def evaluate_answer(question, user_answer, model_answer=None, subject=None, difficulty=None):
     """Evaluate the user's answer using only Hugging Face models"""
@@ -1482,10 +1387,6 @@ def generate_contextual_answer(question, subject, difficulty):
                 f"When working with this concept, professionals need to consider various factors and trade-offs. "
                 f"Best practices involve careful planning, appropriate implementation techniques, and ongoing evaluation. "
                 f"Mastering this area contributes significantly to overall expertise in {subject}.")
-
-# Ensure PostgreSQL URLs from Supabase are correctly formatted for SQLAlchemy
-if app.config['SQLALCHEMY_DATABASE_URI'].startswith("postgres://"):
-    app.config['SQLALCHEMY_DATABASE_URI'] = app.config['SQLALCHEMY_DATABASE_URI'].replace("postgres://", "postgresql://", 1)
 
 if __name__ == '__main__':
     app.run(debug=True)
