@@ -26,6 +26,6 @@ python init_db.py
 
 :: Run the application
 echo Starting Flask application...
-python app.py
+python run.py
 
 pause
