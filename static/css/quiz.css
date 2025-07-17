@@ -1,0 +1,193 @@
+/* Quiz Page Specific Styles */
+
+/* Main Content Spacing for Fixed Navbar */
+.main-content {
+    margin-top: 80px;
+    margin-bottom: 40px;
+    padding-top: 20px;
+}
+
+/* Card Styling */
+.card {
+    border-radius: 12px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+/* Form Controls */
+.form-select-lg {
+    height: 50px;
+    border-radius: 8px;
+    font-size: 1rem;
+    padding-left: 15px;
+}
+
+.form-select:focus,
+.form-control:focus {
+    border-color: #4e54c8;
+    box-shadow: 0 0 0 0.25rem rgba(78, 84, 200, 0.25);
+}
+
+/* Question List Styling */
+.question-list {
+    max-height: 800px;
+    overflow-y: auto;
+    padding-right: 10px;
+}
+
+.question-card {
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+    padding: 20px;
+    border-left: 4px solid #4e54c8;
+    transition: all 0.3s ease;
+}
+
+.question-card:hover {
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+    transform: translateY(-2px);
+}
+
+/* Dark Mode Overrides for Quiz Page */
+[data-theme="dark"] .question-card {
+    background-color: #2a2a2a;
+    border-left: 4px solid #7367f0;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
+    color: #e0e0e0;
+}
+
+[data-theme="dark"] .question-card:hover {
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
+}
+
+[data-theme="dark"] textarea.form-control {
+    background-color: #333;
+    color: #e0e0e0;
+    border-color: #555;
+}
+
+[data-theme="dark"] .form-select {
+    background-color: #333;
+    color: #e0e0e0;
+    border-color: #555;
+}
+
+[data-theme="dark"] .btn-outline-light {
+    color: #ddd;
+    border-color: #ddd;
+}
+
+.question-number {
+    background-color: #4e54c8;
+    color: white;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    margin-right: 10px;
+}
+
+.question-content {
+    font-size: 1.1rem;
+    margin-bottom: 15px;
+    color: #333;
+}
+
+.answer-textarea {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 15px;
+    min-height: 120px;
+    resize: vertical;
+    transition: all 0.3s ease;
+}
+
+.answer-textarea:focus {
+    border-color: #4e54c8;
+    box-shadow: 0 0 0 3px rgba(78, 84, 200, 0.1);
+}
+
+/* Difficulty Badges */
+.badge-beginner {
+    background-color: #28a745;
+    color: white;
+}
+
+.badge-intermediate {
+    background-color: #ffc107;
+    color: #212529;
+}
+
+.badge-advanced {
+    background-color: #dc3545;
+    color: white;
+}
+
+/* Loading Spinner */
+.spinner-container {
+    padding: 40px 20px;
+}
+
+/* Button Hover Effects */
+.btn-primary,
+.btn-success {
+    transition: all 0.3s ease;
+}
+
+.btn-primary:hover,
+.btn-success:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+/* Dark Mode Styling */
+.dark-mode .card {
+    background-color: #222;
+    color: #e0e0e0;
+}
+
+.dark-mode .question-card {
+    background-color: #2a2a2a;
+    border-left-color: #8f94fb;
+}
+
+.dark-mode .form-select,
+.dark-mode .form-control,
+.dark-mode .answer-textarea {
+    background-color: #333;
+    border-color: #444;
+    color: #e0e0e0;
+}
+
+.dark-mode .form-select option {
+    background-color: #333;
+    color: #e0e0e0;
+}
+
+.dark-mode .question-content {
+    color: #e0e0e0;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .btn-group {
+        width: 100%;
+        margin-top: 10px;
+    }
+
+    .btn-group .btn {
+        flex: 1;
+        font-size: 0.85rem;
+        padding-left: 5px;
+        padding-right: 5px;
+    }
+
+    .question-card {
+        padding: 15px;
+    }
+}

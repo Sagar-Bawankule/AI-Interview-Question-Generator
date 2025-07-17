@@ -1,71 +1,131 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Interview Question Generator & Evaluator</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/footer.css') }}">
 </head>
-<body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+
+<body class="landing-page">
+    <!-- Main Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-transparent position-absolute w-100 top-0">
         <div class="container">
-            <a class="navbar-brand" href="{{ url_for('index') }}">
-                <i class="fas fa-brain me-2"></i>AI Interview Question Generator
+            <a class="navbar-brand fw-bold" href="{{ url_for('index') }}">
+                <i class="fas fa-brain me-2"></i>AI Interview Prep
             </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
                     {% if current_user.is_authenticated %}
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('dashboard') }}">Dashboard</a>
+                        <a class="nav-link" href="{{ url_for('dashboard') }}">
+                            <i class="fas fa-tachometer-alt me-1"></i> Dashboard
+                        </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('quiz') }}">Practice</a>
+                        <a class="nav-link" href="{{ url_for('quiz') }}">
+                            <i class="fas fa-question-circle me-1"></i> Practice
+                        </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('leaderboard') }}">Leaderboard</a>
+                        <a class="nav-link" href="{{ url_for('leaderboard') }}">
+                            <i class="fas fa-trophy me-1"></i> Leaderboard
+                        </a>
                     </li>
                     {% if current_user.is_admin %}
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="adminDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            Admin
+                        <a class="nav-link dropdown-toggle" href="#" id="adminDropdown" role="button"
+                            data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-user-shield me-1"></i> Admin
                         </a>
                         <ul class="dropdown-menu" aria-labelledby="adminDropdown">
-                            <li><a class="dropdown-item" href="{{ url_for('admin.dashboard') }}">Admin Dashboard</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('admin.dashboard') }}">Admin Dashboard</a>
+                            </li>
                             <li><a class="dropdown-item" href="{{ url_for('admin.users') }}">Manage Users</a></li>
                             <li><a class="dropdown-item" href="{{ url_for('admin.attempts') }}">View Attempts</a></li>
                         </ul>
                     </li>
                     {% endif %}
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            {{ current_user.username }}
+                        <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
+                            data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-user-circle me-1"></i> {{ current_user.username }}
                         </a>
                         <ul class="dropdown-menu" aria-labelledby="userDropdown">
-                            <li><a class="dropdown-item" href="{{ url_for('auth.profile') }}">Profile</a></li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="{{ url_for('auth.logout') }}">Logout</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('auth.profile') }}">
+                                    <i class="fas fa-id-card me-2"></i> Profile
+                                </a></li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                            <li><a class="dropdown-item" href="{{ url_for('auth.logout') }}">
+                                    <i class="fas fa-sign-out-alt me-2"></i> Logout
+                                </a></li>
                         </ul>
-                    </li>
-                    <li class="nav-item">
-                        <button class="btn btn-outline-light btn-sm ms-2" id="themeToggle">
-                            <span id="themeIcon">🌙</span>
-                        </button>
                     </li>
                     {% else %}
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('auth.login') }}">Login</a>
+                        <a class="nav-link" href="#features">
+                            <i class="fas fa-star me-1"></i> Features
+                        </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('auth.register') }}">Register</a>
+                        <a class="nav-link" href="#how-it-works">
+                            <i class="fas fa-info-circle me-1"></i> How It Works
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('auth.login') }}" class="btn btn-outline-light">
+                            <i class="fas fa-sign-in-alt me-1"></i> Login
+                        </a>
+                    </li>
+                    <li class="nav-item ms-2">
+                        <a href="{{ url_for('auth.register') }}" class="btn btn-light text-primary px-3 rounded-pill">
+                            <i class="fas fa-user-plus me-1"></i> Sign Up
+                        </a>
                     </li>
                     {% endif %}
+                    <li class="nav-item ms-2">
+                        <button id="themeToggle" class="btn btn-sm btn-outline-light rounded-circle">
+                            <span id="themeIcon">🌙</span>
+                        </button>
+                    </li>
                 </ul>
             </div>
         </div>
+    </nav>>
+    <li><a class="dropdown-item" href="{{ url_for('auth.profile') }}">Profile</a></li>
+    <li>
+        <hr class="dropdown-divider">
+    </li>
+    <li><a class="dropdown-item" href="{{ url_for('auth.logout') }}">Logout</a></li>
+    </ul>
+    </li>
+    <li class="nav-item">
+        <button class="btn btn-outline-light btn-sm ms-2" id="themeToggle">
+            <span id="themeIcon">🌙</span>
+        </button>
+    </li>
+    {% else %}
+    <li class="nav-item">
+        <a class="nav-link" href="{{ url_for('auth.login') }}">Login</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="{{ url_for('auth.register') }}">Register</a>
+    </li>
+    {% endif %}
+    </ul>
+    </div>
+    </div>
     </nav>
 
     <!-- Hero Section -->
@@ -75,23 +135,24 @@
                 <div class="col-lg-6">
                     <h1 class="display-4 fw-bold mb-4">AI-Powered Interview Practice</h1>
                     <p class="lead mb-4">
-                        Enhance your interview skills with our AI-powered question generator and intelligent answer evaluation system.
+                        Enhance your interview skills with our AI-powered question generator and intelligent answer
+                        evaluation system.
                     </p>
                     <div class="d-flex flex-wrap gap-2">
                         {% if current_user.is_authenticated %}
-                            <a href="{{ url_for('quiz') }}" class="btn btn-light btn-lg">
-                                <i class="fas fa-play me-2"></i>Start Practice
-                            </a>
-                            <a href="{{ url_for('dashboard') }}" class="btn btn-outline-light btn-lg">
-                                <i class="fas fa-chart-line me-2"></i>View Dashboard
-                            </a>
+                        <a href="{{ url_for('quiz') }}" class="btn btn-light btn-lg">
+                            <i class="fas fa-play me-2"></i>Start Practice
+                        </a>
+                        <a href="{{ url_for('dashboard') }}" class="btn btn-outline-light btn-lg">
+                            <i class="fas fa-chart-line me-2"></i>View Dashboard
+                        </a>
                         {% else %}
-                            <a href="{{ url_for('auth.register') }}" class="btn btn-light btn-lg">
-                                <i class="fas fa-user-plus me-2"></i>Get Started Free
-                            </a>
-                            <a href="{{ url_for('auth.login') }}" class="btn btn-outline-light btn-lg">
-                                <i class="fas fa-sign-in-alt me-2"></i>Login
-                            </a>
+                        <a href="{{ url_for('auth.register') }}" class="btn btn-light btn-lg">
+                            <i class="fas fa-user-plus me-2"></i>Get Started Free
+                        </a>
+                        <a href="{{ url_for('auth.login') }}" class="btn btn-outline-light btn-lg">
+                            <i class="fas fa-sign-in-alt me-2"></i>Login
+                        </a>
                         {% endif %}
                     </div>
                 </div>
@@ -104,415 +165,561 @@
 
     <div class="container my-5">
         {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                {% for category, message in messages %}
-                    <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show" role="alert">
-                        {{ message }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                    </div>
-                {% endfor %}
-            {% endif %}
+        {% if messages %}
+        {% for category, message in messages %}
+        <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show"
+            role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% endfor %}
+        {% endif %}
         {% endwith %}
 
-        <!-- Features Section -->
-        <div class="row mb-5">
-            <div class="col-12 text-center mb-5">
-                <h2 class="display-5 fw-bold">Why Choose Our Platform?</h2>
-                <p class="lead text-muted">Everything you need to ace your next interview</p>
-            </div>
-            
-            <div class="col-md-4 mb-4">
-                <div class="card h-100 text-center border-0 shadow-sm">
-                    <div class="card-body p-4">
-                        <div class="mb-3">
-                            <i class="fas fa-brain fa-3x text-primary"></i>
-                        </div>
-                        <h5 class="card-title">AI-Generated Questions</h5>
-                        <p class="card-text text-muted">
-                            Get personalized interview questions generated by advanced AI based on your chosen subject and difficulty level.
-                        </p>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="col-md-4 mb-4">
-                <div class="card h-100 text-center border-0 shadow-sm">
-                    <div class="card-body p-4">
-                        <div class="mb-3">
-                            <i class="fas fa-search fa-3x text-success"></i>
-                        </div>
-                        <h5 class="card-title">Intelligent Evaluation</h5>
-                        <p class="card-text text-muted">
-                            Receive detailed feedback, scores, and model answers for each of your responses using AI evaluation.
-                        </p>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="col-md-4 mb-4">
-                <div class="card h-100 text-center border-0 shadow-sm">
-                    <div class="card-body p-4">
-                        <div class="mb-3">
-                            <i class="fas fa-chart-line fa-3x text-info"></i>
-                        </div>
-                        <h5 class="card-title">Progress Tracking</h5>
-                        <p class="card-text text-muted">
-                            Monitor your improvement with detailed analytics, performance charts, and comprehensive reports.
-                        </p>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Subject Areas -->
-        <div class="row mb-5">
+        {% if stats is defined %}
+        <!-- Stats Section -->
+        <div class="row mb-5 mt-5 pt-3">
             <div class="col-12 text-center mb-4">
-                <h3 class="fw-bold">Popular Subject Areas</h3>
-                <p class="text-muted">Practice with questions from various technical domains</p>
+                <h2 class="display-5 fw-bold section-title">Our Community</h2>
             </div>
-            
-            <div class="col-lg-10 mx-auto">
-                <div class="row g-3">
-                    <div class="col-md-4 col-sm-6">
-                        <div class="card bg-light border-0 text-center">
-                            <div class="card-body py-3">
-                                <i class="fab fa-python text-warning me-2"></i>
-                                <strong>Python Programming</strong>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-4 col-sm-6">
-                        <div class="card bg-light border-0 text-center">
-                            <div class="card-body py-3">
-                                <i class="fab fa-js-square text-warning me-2"></i>
-                                <strong>JavaScript</strong>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-4 col-sm-6">
-                        <div class="card bg-light border-0 text-center">
-                            <div class="card-body py-3">
-                                <i class="fas fa-robot text-info me-2"></i>
-                                <strong>Machine Learning</strong>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-4 col-sm-6">
-                        <div class="card bg-light border-0 text-center">
-                            <div class="card-body py-3">
-                                <i class="fas fa-database text-success me-2"></i>
-                                <strong>Database Management</strong>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-4 col-sm-6">
-                        <div class="card bg-light border-0 text-center">
-                            <div class="card-body py-3">
-                                <i class="fas fa-sitemap text-primary me-2"></i>
-                                <strong>System Design</strong>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-4 col-sm-6">
-                        <div class="card bg-light border-0 text-center">
-                            <div class="card-body py-3">
-                                <i class="fas fa-cogs text-secondary me-2"></i>
-                                <strong>DevOps</strong>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
 
-        <!-- How It Works -->
-        <div class="row mb-5">
-            <div class="col-12 text-center mb-4">
-                <h3 class="fw-bold">How It Works</h3>
-                <p class="text-muted">Simple steps to improve your interview skills</p>
-            </div>
-            
-            <div class="col-md-3 text-center mb-4">
-                <div class="mb-3">
-                    <div class="bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
-                        <span class="fw-bold fs-4">1</span>
+            <div class="col-md-4 mb-4 animate__animated animate__fadeIn">
+                <div class="card h-100 text-center border-0 shadow-sm hover-card">
+                    <div class="card-body p-4">
+                        <h3 class="display-4 fw-bold text-primary counter">{{ stats.total_users }}</h3>
+                        <p class="lead text-muted">Active Users</p>
                     </div>
                 </div>
-                <h6>Choose Subject & Difficulty</h6>
-                <p class="text-muted small">Select your topic and skill level</p>
             </div>
-            
-            <div class="col-md-3 text-center mb-4">
-                <div class="mb-3">
-                    <div class="bg-success text-white rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
-                        <span class="fw-bold fs-4">2</span>
-                    </div>
-                </div>
-                <h6>Generate Questions</h6>
-                <p class="text-muted small">AI creates personalized questions</p>
-            </div>
-            
-            <div class="col-md-3 text-center mb-4">
-                <div class="mb-3">
-                    <div class="bg-info text-white rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
-                        <span class="fw-bold fs-4">3</span>
-                    </div>
-                </div>
-                <h6>Answer Questions</h6>
-                <p class="text-muted small">Provide your best responses</p>
-            </div>
-            
-            <div class="col-md-3 text-center mb-4">
-                <div class="mb-3">
-                    <div class="bg-warning text-white rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
-                        <span class="fw-bold fs-4">4</span>
-                    </div>
-                </div>
-                <h6>Get Feedback</h6>
-                <p class="text-muted small">Receive detailed evaluation</p>
-            </div>
-        </div>
 
-        <!-- Call to Action -->
-        {% if not current_user.is_authenticated %}
-        <div class="row">
-            <div class="col-lg-8 mx-auto text-center">
-                <div class="card bg-light border-0">
-                    <div class="card-body py-5">
-                        <h3 class="fw-bold mb-3">Ready to Improve Your Interview Skills?</h3>
-                        <p class="text-muted mb-4">Join thousands of users who have improved their interview performance with our AI-powered platform.</p>
-                        <div class="d-flex justify-content-center gap-3">
-                            <a href="{{ url_for('auth.register') }}" class="btn btn-primary btn-lg">
-                                <i class="fas fa-rocket me-2"></i>Start Free Today
-                            </a>
-                            <a href="{{ url_for('auth.login') }}" class="btn btn-outline-primary btn-lg">
-                                <i class="fas fa-sign-in-alt me-2"></i>Login
-                            </a>
-                        </div>
+            <div class="col-md-4 mb-4 animate__animated animate__fadeIn" style="animation-delay: 0.2s">
+                <div class="card h-100 text-center border-0 shadow-sm hover-card">
+                    <div class="card-body p-4">
+                        <h3 class="display-4 fw-bold text-success counter">{{ stats.total_attempts }}</h3>
+                        <p class="lead text-muted">Practice Interviews</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4 mb-4 animate__animated animate__fadeIn" style="animation-delay: 0.4s">
+                <div class="card h-100 text-center border-0 shadow-sm hover-card">
+                    <div class="card-body p-4">
+                        <h3 class="display-4 fw-bold text-info counter">{{ stats.total_questions }}</h3>
+                        <p class="lead text-muted">Questions Answered</p>
                     </div>
                 </div>
             </div>
         </div>
         {% endif %}
+
+        <!-- Features Section -->
+        <div class="row mb-5 pt-3">
+            <div class="col-12 text-center mb-5">
+                <h2 class="display-5 fw-bold section-title">Why Choose Our Platform?</h2>
+                <p class="lead text-muted">Everything you need to ace your next interview</p>
+            </div>
+
+            <div class="col-md-4 mb-4 animate__animated animate__fadeInUp">
+                <div class="card h-100 text-center border-0 shadow-sm hover-card">
+                    <div class="card-body p-4">
+                        <div class="feature-icon">
+                            <i class="fas fa-robot fa-3x text-primary"></i>
+                        </div>
+                        <h5 class="card-title">AI-Generated Questions</h5>
+                        <p class="card-text text-muted">
+                            Get personalized interview questions generated by advanced AI based on your chosen subject
+                            and difficulty level.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4 mb-4 animate__animated animate__fadeInUp" style="animation-delay: 0.2s">
+                <div class="card h-100 text-center border-0 shadow-sm hover-card">
+                    <div class="card-body p-4">
+                        <div class="feature-icon">
+                            <i class="fas fa-brain fa-3x text-success"></i>
+                        </div>
+                        <h5 class="card-title">Intelligent Evaluation</h5>
+                        <p class="card-text text-muted">
+                            Receive detailed feedback, scores, and model answers for each of your responses using AI
+                            evaluation.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4 mb-4 animate__animated animate__fadeInUp" style="animation-delay: 0.4s">
+                <div class="card h-100 text-center border-0 shadow-sm hover-card">
+                    <div class="card-body p-4">
+                        <div class="feature-icon">
+                            <i class="fas fa-chart-line fa-3x text-info"></i>
+                        </div>
+                        <h5 class="card-title">Progress Tracking</h5>
+                        <p class="card-text text-muted">
+                            Monitor your improvement with detailed analytics, performance charts, and comprehensive
+                            reports.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {% if stats is defined and stats.popular_subjects %}
+        <!-- Popular Subjects Section -->
+        <div class="row mb-5 pt-3">
+            <div class="col-12 text-center mb-4">
+                <h2 class="display-5 fw-bold section-title">Popular Interview Topics</h2>
+            </div>
+
+            <div class="col-lg-10 mx-auto">
+                <div class="card border-0 shadow-sm p-4">
+                    <div class="d-flex flex-wrap justify-content-center gap-2">
+                        {% for subject in stats.popular_subjects %}
+                        <span class="badge bg-primary p-3 animate__animated animate__fadeIn"
+                            style="animation-delay: {{ loop.index0 * 0.1 }}s; font-size: 1rem;">
+                            {{ subject.subject }}
+                            <span class="badge bg-light text-primary ms-2 rounded-circle">{{ subject.count }}</span>
+                        </span>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Call to Action Section -->
+        <div class="row my-5 py-5">
+            <div class="col-lg-10 mx-auto">
+                <div class="card border-0 shadow bg-gradient-primary text-white p-5 text-center">
+                    <h2 class="fw-bold mb-4 animate__animated animate__fadeIn">Ready to Ace Your Next Interview?</h2>
+                    <p class="lead mb-4 animate__animated animate__fadeIn" style="animation-delay: 0.2s">Join thousands
+                        of professionals who are improving their interview skills with our AI-powered platform.</p>
+                    <div class="d-flex justify-content-center gap-3 animate__animated animate__fadeIn"
+                        style="animation-delay: 0.4s">
+                        <a href="{{ url_for('auth.register') }}" class="btn btn-light btn-lg px-4 shadow-sm">
+                            <i class="fas fa-rocket me-2"></i>Start Practicing Now
+                        </a>
+                        <a href="{{ url_for('quiz') }}" class="btn btn-outline-light btn-lg px-4">
+                            <i class="fas fa-play me-2"></i>Try a Demo Quiz
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+    </div>
+    </div>
+
+    <!-- Subject Areas -->
+    <div class="row mb-5">
+        <div class="col-12 text-center mb-4">
+            <h3 class="fw-bold">Popular Subject Areas</h3>
+            <p class="text-muted">Practice with questions from various technical domains</p>
+        </div>
+
+        <div class="col-lg-10 mx-auto">
+            <div class="row g-3">
+                <div class="col-md-4 col-sm-6">
+                    <div class="card bg-light border-0 text-center">
+                        <div class="card-body py-3">
+                            <i class="fab fa-python text-warning me-2"></i>
+                            <strong>Python Programming</strong>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 col-sm-6">
+                    <div class="card bg-light border-0 text-center">
+                        <div class="card-body py-3">
+                            <i class="fab fa-js-square text-warning me-2"></i>
+                            <strong>JavaScript</strong>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 col-sm-6">
+                    <div class="card bg-light border-0 text-center">
+                        <div class="card-body py-3">
+                            <i class="fas fa-robot text-info me-2"></i>
+                            <strong>Machine Learning</strong>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 col-sm-6">
+                    <div class="card bg-light border-0 text-center">
+                        <div class="card-body py-3">
+                            <i class="fas fa-database text-success me-2"></i>
+                            <strong>Database Management</strong>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 col-sm-6">
+                    <div class="card bg-light border-0 text-center">
+                        <div class="card-body py-3">
+                            <i class="fas fa-sitemap text-primary me-2"></i>
+                            <strong>System Design</strong>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 col-sm-6">
+                    <div class="card bg-light border-0 text-center">
+                        <div class="card-body py-3">
+                            <i class="fas fa-cogs text-secondary me-2"></i>
+                            <strong>DevOps</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- How It Works -->
+    <div class="row mb-5">
+        <div class="col-12 text-center mb-4">
+            <h3 class="fw-bold">How It Works</h3>
+            <p class="text-muted">Simple steps to improve your interview skills</p>
+        </div>
+
+        <div class="col-md-3 text-center mb-4">
+            <div class="mb-3">
+                <div class="bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center"
+                    style="width: 60px; height: 60px;">
+                    <span class="fw-bold fs-4">1</span>
+                </div>
+            </div>
+            <h6>Choose Subject & Difficulty</h6>
+            <p class="text-muted small">Select your topic and skill level</p>
+        </div>
+
+        <div class="col-md-3 text-center mb-4">
+            <div class="mb-3">
+                <div class="bg-success text-white rounded-circle d-inline-flex align-items-center justify-content-center"
+                    style="width: 60px; height: 60px;">
+                    <span class="fw-bold fs-4">2</span>
+                </div>
+            </div>
+            <h6>Generate Questions</h6>
+            <p class="text-muted small">AI creates personalized questions</p>
+        </div>
+
+        <div class="col-md-3 text-center mb-4">
+            <div class="mb-3">
+                <div class="bg-info text-white rounded-circle d-inline-flex align-items-center justify-content-center"
+                    style="width: 60px; height: 60px;">
+                    <span class="fw-bold fs-4">3</span>
+                </div>
+            </div>
+            <h6>Answer Questions</h6>
+            <p class="text-muted small">Provide your best responses</p>
+        </div>
+
+        <div class="col-md-3 text-center mb-4">
+            <div class="mb-3">
+                <div class="bg-warning text-white rounded-circle d-inline-flex align-items-center justify-content-center"
+                    style="width: 60px; height: 60px;">
+                    <span class="fw-bold fs-4">4</span>
+                </div>
+            </div>
+            <h6>Get Feedback</h6>
+            <p class="text-muted small">Receive detailed evaluation</p>
+        </div>
+    </div>
+
+    <!-- Call to Action -->
+    {% if not current_user.is_authenticated %}
+    <div class="row">
+        <div class="col-lg-8 mx-auto text-center">
+            <div class="card bg-light border-0">
+                <div class="card-body py-5">
+                    <h3 class="fw-bold mb-3">Ready to Improve Your Interview Skills?</h3>
+                    <p class="text-muted mb-4">Join thousands of users who have improved their interview performance
+                        with our AI-powered platform.</p>
+                    <div class="d-flex justify-content-center gap-3">
+                        <a href="{{ url_for('auth.register') }}" class="btn btn-primary btn-lg">
+                            <i class="fas fa-rocket me-2"></i>Start Free Today
+                        </a>
+                        <a href="{{ url_for('auth.login') }}" class="btn btn-outline-primary btn-lg">
+                            <i class="fas fa-sign-in-alt me-2"></i>Login
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
     </div>
 
     <!-- Footer -->
-    <footer class="bg-dark text-white py-4 mt-5">
+    <footer class="bg-gradient-dark text-white py-5 mt-5">
         <div class="container">
-            <div class="row">
-                <div class="col-md-6">
-                    <h6>AI Interview Question Generator</h6>
-                    <p class="text-muted small">Powered by advanced AI technology to help you ace your interviews.</p>
-                </div>
-                <div class="col-md-6 text-md-end">
-                    <div class="d-flex justify-content-md-end gap-3">
-                        {% if current_user.is_authenticated %}
-                            <a href="{{ url_for('dashboard') }}" class="text-light text-decoration-none">Dashboard</a>
-                            <a href="{{ url_for('quiz') }}" class="text-light text-decoration-none">Practice</a>
-                            <a href="{{ url_for('leaderboard') }}" class="text-light text-decoration-none">Leaderboard</a>
-                        {% endif %}
+            <div class="row g-4">
+                <div class="col-lg-4 col-md-6">
+                    <h5 class="fw-bold mb-3">AI Interview Question Generator</h5>
+                    <p class="text-light-muted">Powered by advanced AI technology to help you ace your technical
+                        interviews and improve your skills.</p>
+                    <div class="d-flex gap-3 mt-4">
+                        <a href="#" class="text-white social-icon"><i class="fab fa-github"></i></a>
+                        <a href="#" class="text-white social-icon"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="text-white social-icon"><i class="fab fa-linkedin"></i></a>
+                        <a href="#" class="text-white social-icon"><i class="fab fa-discord"></i></a>
                     </div>
+                </div>
+                <div class="col-lg-2 col-md-6">
+                    <h6 class="fw-bold mb-3">Quick Links</h6>
+                    <ul class="list-unstyled footer-links">
+                        <li><a href="{{ url_for('index') }}" class="footer-link"><i
+                                    class="fas fa-home me-2"></i>Home</a></li>
+                        {% if current_user.is_authenticated %}
+                        <li><a href="{{ url_for('dashboard') }}" class="footer-link"><i
+                                    class="fas fa-tachometer-alt me-2"></i>Dashboard</a></li>
+                        <li><a href="{{ url_for('quiz') }}" class="footer-link"><i
+                                    class="fas fa-question-circle me-2"></i>Practice</a></li>
+                        <li><a href="{{ url_for('leaderboard') }}" class="footer-link"><i
+                                    class="fas fa-trophy me-2"></i>Leaderboard</a></li>
+                        {% else %}
+                        <li><a href="{{ url_for('auth.login') }}" class="footer-link"><i
+                                    class="fas fa-sign-in-alt me-2"></i>Login</a></li>
+                        <li><a href="{{ url_for('auth.register') }}" class="footer-link"><i
+                                    class="fas fa-user-plus me-2"></i>Register</a></li>
+                        {% endif %}
+                    </ul>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <h6 class="fw-bold mb-3">Popular Topics</h6>
+                    <div class="d-flex flex-wrap gap-2">
+                        <a href="#"
+                            class="badge bg-primary bg-opacity-25 text-primary px-3 py-2 rounded-pill">Python</a>
+                        <a href="#"
+                            class="badge bg-primary bg-opacity-25 text-primary px-3 py-2 rounded-pill">JavaScript</a>
+                        <a href="#" class="badge bg-primary bg-opacity-25 text-primary px-3 py-2 rounded-pill">SQL</a>
+                        <a href="#" class="badge bg-primary bg-opacity-25 text-primary px-3 py-2 rounded-pill">Data
+                            Structures</a>
+                        <a href="#" class="badge bg-primary bg-opacity-25 text-primary px-3 py-2 rounded-pill">Machine
+                            Learning</a>
+                        <a href="#" class="badge bg-primary bg-opacity-25 text-primary px-3 py-2 rounded-pill">Web
+                            Dev</a>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <h6 class="fw-bold mb-3">Newsletter</h6>
+                    <p class="small text-light-muted">Subscribe to receive updates, new features, and interview tips.
+                    </p>
+                    <form class="newsletter-form mt-3">
+                        <div class="input-group">
+                            <input type="email" class="form-control" placeholder="Your email" aria-label="Your email">
+                            <button class="btn btn-primary" type="submit"><i class="fas fa-paper-plane"></i></button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <hr class="mt-4 mb-3 border-light opacity-10">
+            <div class="row align-items-center">
+                <div class="col-md-6 text-center text-md-start">
+                    <p class="small text-light-muted mb-md-0">© 2023 AI Interview Question Generator. All rights
+                        reserved.</p>
+                </div>
+                <div class="col-md-6 text-center text-md-end">
+                    <a href="#" class="text-decoration-none small text-light-muted me-3">Privacy Policy</a>
+                    <a href="#" class="text-decoration-none small text-light-muted me-3">Terms of Service</a>
+                    <a href="#" class="text-decoration-none small text-light-muted">Contact Us</a>
                 </div>
             </div>
         </div>
     </footer>
 
+    <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://kit.fontawesome.com/your-fontawesome-kit.js" crossorigin="anonymous"></script>
-    
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+    <script src="{{ url_for('static', filename='js/animations.js') }}"></script>
+
     <script>
         // Theme toggle functionality
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             const themeToggle = document.getElementById('themeToggle');
             const themeIcon = document.getElementById('themeIcon');
-            
+
             if (themeToggle && themeIcon) {
                 // Load saved theme
                 const savedTheme = localStorage.getItem('theme') || 'light';
                 document.documentElement.setAttribute('data-theme', savedTheme);
                 updateThemeIcon(savedTheme);
-                
-                themeToggle.addEventListener('click', function() {
+
+                themeToggle.addEventListener('click', function () {
                     const currentTheme = document.documentElement.getAttribute('data-theme');
                     const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-                    
+
                     document.documentElement.setAttribute('data-theme', newTheme);
                     localStorage.setItem('theme', newTheme);
                     updateThemeIcon(newTheme);
-                    
+
                     // Send theme update to server if logged in
-                    if ({{ 'true' if current_user.is_authenticated else 'false' }}) {
-                        fetch('/api/theme', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                            },
-                            body: JSON.stringify({theme: newTheme})
-                        });
-                    }
-                });
+                    if ({{ 'true' if current_user.is_authenticated else 'false' }
+                }) {
+                    fetch('/api/theme', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ theme: newTheme })
+                    });
+                }
+            });
             }
         });
-
-        function updateThemeIcon(theme) {
-            const themeIcon = document.getElementById('themeIcon');
-            if (themeIcon) {
-                themeIcon.textContent = theme === 'dark' ? '☀️' : '🌙';
-            }
-        }
     </script>
 </body>
+
 </html>
-            <form id="generate-form">
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <label for="subject" class="form-label">Select a subject for interview questions:</label>
-                        <select class="form-select" id="subject" name="subject" required>
-                            <option value="" disabled selected>Choose a subject</option>
-                            <option value="Python Programming">Python Programming</option>
-                            <option value="Java Programming">Java Programming</option>
-                            <option value="JavaScript">JavaScript</option>
-                            <option value="Database Management">Database Management</option>
-                            <option value="SQL">SQL</option>
-                            <option value="Data Structures">Data Structures</option>
-                            <option value="Algorithms">Algorithms</option>
-                            <option value="Machine Learning">Machine Learning</option>
-                            <option value="Web Development">Web Development</option>
-                            <option value="DevOps">DevOps</option>
-                            <option value="Cloud Computing">Cloud Computing</option>
-                            <option value="Software Engineering">Software Engineering</option>
-                        </select>
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <label for="difficulty" class="form-label">Select difficulty level:</label>
-                        <div class="d-flex">
-                            <div class="form-check form-check-inline">
-                                <input class="form-check-input" type="radio" name="difficulty" id="easy" value="Easy" checked>
-                                <label class="form-check-label" for="easy">Easy</label>
-                            </div>
-                            <div class="form-check form-check-inline">
-                                <input class="form-check-input" type="radio" name="difficulty" id="medium" value="Medium">
-                                <label class="form-check-label" for="medium">Medium</label>
-                            </div>
-                            <div class="form-check form-check-inline">
-                                <input class="form-check-input" type="radio" name="difficulty" id="hard" value="Hard">
-                                <label class="form-check-label" for="hard">Hard</label>
-                            </div>
-                        </div>
-                    </div>
+<form id="generate-form">
+    <div class="row">
+        <div class="col-md-6 mb-3">
+            <label for="subject" class="form-label">Select a subject for interview questions:</label>
+            <select class="form-select" id="subject" name="subject" required>
+                <option value="" disabled selected>Choose a subject</option>
+                <option value="Python Programming">Python Programming</option>
+                <option value="Java Programming">Java Programming</option>
+                <option value="JavaScript">JavaScript</option>
+                <option value="Database Management">Database Management</option>
+                <option value="SQL">SQL</option>
+                <option value="Data Structures">Data Structures</option>
+                <option value="Algorithms">Algorithms</option>
+                <option value="Machine Learning">Machine Learning</option>
+                <option value="Web Development">Web Development</option>
+                <option value="DevOps">DevOps</option>
+                <option value="Cloud Computing">Cloud Computing</option>
+                <option value="Software Engineering">Software Engineering</option>
+            </select>
+        </div>
+        <div class="col-md-6 mb-3">
+            <label for="difficulty" class="form-label">Select difficulty level:</label>
+            <div class="d-flex">
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="radio" name="difficulty" id="easy" value="Easy" checked>
+                    <label class="form-check-label" for="easy">Easy</label>
                 </div>
-                <button type="submit" class="btn btn-primary">Generate Questions</button>
-            </form>
-        </div>
-        
-        <div id="loading" class="text-center d-none">
-            <div class="spinner-border text-primary" role="status">
-                <span class="visually-hidden">Loading...</span>
-            </div>
-            <p>Generating questions, please wait...</p>
-        </div>
-        
-        <div id="questions-section" class="d-none">
-            <h2 class="mb-3">Interview Questions</h2>
-            <p class="text-muted mb-4">Answer the following questions to test your knowledge:</p>
-            
-            <form id="answers-form">
-                <input type="hidden" id="subject-hidden" name="subject">
-                <input type="hidden" id="difficulty-hidden" name="difficulty">
-                <div id="questions-container">
-                    <!-- Questions will be dynamically added here -->
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="radio" name="difficulty" id="medium" value="Medium">
+                    <label class="form-check-label" for="medium">Medium</label>
                 </div>
-                
-                <div class="d-flex justify-content-between mt-4">
-                    <div>
-                        <button type="button" id="refresh-questions" class="btn btn-secondary me-2">Refresh Questions</button>
-                        <button type="button" id="load-more-questions" class="btn btn-info">Load 5 More Questions</button>
-                    </div>
-                    <button type="submit" class="btn btn-success">Submit Answers for Evaluation</button>
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="radio" name="difficulty" id="hard" value="Hard">
+                    <label class="form-check-label" for="hard">Hard</label>
                 </div>
-            </form>
-        </div>
-        
-        <div id="evaluation-loading" class="text-center d-none">
-            <div class="spinner-border text-success" role="status">
-                <span class="visually-hidden">Loading...</span>
             </div>
-            <p>Evaluating your answers, please wait...</p>
         </div>
-        
-        <div id="results-section" class="d-none mt-5">
-            <h2 class="mb-4">Evaluation Results</h2>
-            <div id="results-container">
-                <!-- Results will be dynamically added here -->
-            </div>
-            
-            <button id="try-again" class="btn btn-outline-primary mt-4">Try Another Subject</button>
-        </div>
-        
-        <div class="alert alert-danger d-none mt-3" id="error-message"></div>
     </div>
-    
-    <footer class="bg-light py-3 mt-5">
-        <div class="container text-center">
-            <p class="text-muted mb-0">AI Interview Question Generator & Evaluator &copy; 2025</p>
+    <button type="submit" class="btn btn-primary">Generate Questions</button>
+</form>
+</div>
+
+<div id="loading" class="text-center d-none">
+    <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+    </div>
+    <p>Generating questions, please wait...</p>
+</div>
+
+<div id="questions-section" class="d-none">
+    <h2 class="mb-3">Interview Questions</h2>
+    <p class="text-muted mb-4">Answer the following questions to test your knowledge:</p>
+
+    <form id="answers-form">
+        <input type="hidden" id="subject-hidden" name="subject">
+        <input type="hidden" id="difficulty-hidden" name="difficulty">
+        <div id="questions-container">
+            <!-- Questions will be dynamically added here -->
         </div>
-    </footer>
-    
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const generateForm = document.getElementById('generate-form');
-            const answersForm = document.getElementById('answers-form');
-            const subjectForm = document.getElementById('subject-form');
-            const questionsSection = document.getElementById('questions-section');
-            const resultsSection = document.getElementById('results-section');
-            const loading = document.getElementById('loading');
-            const evalLoading = document.getElementById('evaluation-loading');
-            const errorMessage = document.getElementById('error-message');
-            const tryAgainBtn = document.getElementById('try-again');
-            
-            // Generate questions
-            generateForm.addEventListener('submit', function(e) {
-                e.preventDefault();
-                
-                const subject = document.getElementById('subject').value.trim();
-                const difficulty = document.querySelector('input[name="difficulty"]:checked').value;
-                
-                if (!subject) return;
-                
-                // Set hidden fields
-                document.getElementById('subject-hidden').value = subject;
-                document.getElementById('difficulty-hidden').value = difficulty;
-                
-                // Show loading
-                loading.classList.remove('d-none');
-                errorMessage.classList.add('d-none');
-                
-                // Send request to generate questions
-                fetch('/generate_questions', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                    },
-                    body: new URLSearchParams({
-                        'subject': subject,
-                        'difficulty': difficulty
-                    })
+
+        <div class="d-flex justify-content-between mt-4">
+            <div>
+                <button type="button" id="refresh-questions" class="btn btn-secondary me-2">Refresh Questions</button>
+                <button type="button" id="load-more-questions" class="btn btn-info">Load 5 More Questions</button>
+            </div>
+            <button type="submit" class="btn btn-success">Submit Answers for Evaluation</button>
+        </div>
+    </form>
+</div>
+
+<div id="evaluation-loading" class="text-center d-none">
+    <div class="spinner-border text-success" role="status">
+        <span class="visually-hidden">Loading...</span>
+    </div>
+    <p>Evaluating your answers, please wait...</p>
+</div>
+
+<div id="results-section" class="d-none mt-5">
+    <h2 class="mb-4">Evaluation Results</h2>
+    <div id="results-container">
+        <!-- Results will be dynamically added here -->
+    </div>
+
+    <button id="try-again" class="btn btn-outline-primary mt-4">Try Another Subject</button>
+</div>
+
+<div class="alert alert-danger d-none mt-3" id="error-message"></div>
+</div>
+
+<footer class="bg-light py-3 mt-5">
+    <div class="container text-center">
+        <p class="text-muted mb-0">AI Interview Question Generator & Evaluator &copy; 2025</p>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const generateForm = document.getElementById('generate-form');
+        const answersForm = document.getElementById('answers-form');
+        const subjectForm = document.getElementById('subject-form');
+        const questionsSection = document.getElementById('questions-section');
+        const resultsSection = document.getElementById('results-section');
+        const loading = document.getElementById('loading');
+        const evalLoading = document.getElementById('evaluation-loading');
+        const errorMessage = document.getElementById('error-message');
+        const tryAgainBtn = document.getElementById('try-again');
+
+        // Generate questions
+        generateForm.addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            const subject = document.getElementById('subject').value.trim();
+            const difficulty = document.querySelector('input[name="difficulty"]:checked').value;
+
+            if (!subject) return;
+
+            // Set hidden fields
+            document.getElementById('subject-hidden').value = subject;
+            document.getElementById('difficulty-hidden').value = difficulty;
+
+            // Show loading
+            loading.classList.remove('d-none');
+            errorMessage.classList.add('d-none');
+
+            // Send request to generate questions
+            fetch('/generate_questions', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: new URLSearchParams({
+                    'subject': subject,
+                    'difficulty': difficulty
                 })
+            })
                 .then(response => response.json())
                 .then(data => {
                     loading.classList.add('d-none');
-                    
+
                     if (data.error) {
                         errorMessage.textContent = data.error;
                         errorMessage.classList.remove('d-none');
                         return;
                     }
-                    
+
                     // Display questions
                     const questionsContainer = document.getElementById('questions-container');
                     questionsContainer.innerHTML = '';
-                    
+
                     data.questions.forEach((question, index) => {
                         const questionCard = document.createElement('div');
                         questionCard.className = 'card mb-4 shadow-sm';
@@ -530,7 +737,7 @@
                         `;
                         questionsContainer.appendChild(questionCard);
                     });
-                    
+
                     // Show questions section
                     subjectForm.classList.add('d-none');
                     questionsSection.classList.remove('d-none');
@@ -541,44 +748,44 @@
                     errorMessage.classList.remove('d-none');
                     console.error('Error:', error);
                 });
-            });
-            
-            // Submit answers for evaluation
-            answersForm.addEventListener('submit', function(e) {
-                e.preventDefault();
-                
-                // Show loading
-                evalLoading.classList.remove('d-none');
-                errorMessage.classList.add('d-none');
-                
-                // Collect all form data
-                const formData = new FormData(answersForm);
-                
-                // Send request to evaluate answers
-                fetch('/evaluate_answers', {
-                    method: 'POST',
-                    body: formData
-                })
+        });
+
+        // Submit answers for evaluation
+        answersForm.addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            // Show loading
+            evalLoading.classList.remove('d-none');
+            errorMessage.classList.add('d-none');
+
+            // Collect all form data
+            const formData = new FormData(answersForm);
+
+            // Send request to evaluate answers
+            fetch('/evaluate_answers', {
+                method: 'POST',
+                body: formData
+            })
                 .then(response => response.json())
                 .then(data => {
                     evalLoading.classList.add('d-none');
-                    
+
                     if (data.error) {
                         errorMessage.textContent = data.error;
                         errorMessage.classList.remove('d-none');
                         return;
                     }
-                    
+
                     // Display evaluation results
                     const resultsContainer = document.getElementById('results-container');
                     resultsContainer.innerHTML = '';
-                    
+
                     let totalScore = 0;
-                    
+
                     data.evaluations.forEach((item, index) => {
                         const resultCard = document.createElement('div');
                         resultCard.className = 'card mb-4 shadow-sm';
-                        
+
                         // Determine the color based on correctness
                         let headerClass = 'bg-warning'; // Default for partially correct
                         if (item.evaluation.correctness === 'Correct') {
@@ -586,9 +793,9 @@
                         } else if (item.evaluation.correctness === 'Incorrect') {
                             headerClass = 'bg-danger text-white';
                         }
-                        
+
                         totalScore += item.evaluation.rating;
-                        
+
                         resultCard.innerHTML = `
                             <div class="card-header ${headerClass}">
                                 <h5 class="card-title mb-0">Question ${index + 1} - ${item.evaluation.correctness}</h5>
@@ -634,7 +841,7 @@
                         `;
                         resultsContainer.appendChild(resultCard);
                     });
-                    
+
                     // Add overall score
                     const averageScore = totalScore / data.evaluations.length;
                     const scoreCard = document.createElement('div');
@@ -646,7 +853,7 @@
                         </div>
                     `;
                     resultsContainer.prepend(scoreCard);
-                    
+
                     // Show results section
                     questionsSection.classList.add('d-none');
                     resultsSection.classList.remove('d-none');
@@ -657,49 +864,49 @@
                     errorMessage.classList.remove('d-none');
                     console.error('Error:', error);
                 });
-            });
-            
-            // Try again button
-            tryAgainBtn.addEventListener('click', function() {
-                resultsSection.classList.add('d-none');
-                subjectForm.classList.remove('d-none');
-                document.getElementById('subject').value = '';
-            });
+        });
 
-            // Refresh questions button
-            document.getElementById('refresh-questions').addEventListener('click', function() {
-                const subject = document.getElementById('subject-hidden').value;
-                const difficulty = document.getElementById('difficulty-hidden').value;
+        // Try again button
+        tryAgainBtn.addEventListener('click', function () {
+            resultsSection.classList.add('d-none');
+            subjectForm.classList.remove('d-none');
+            document.getElementById('subject').value = '';
+        });
 
-                // Show loading
-                loading.classList.remove('d-none');
-                
-                // Send request to refresh questions
-                fetch('/generate_questions', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                    },
-                    body: new URLSearchParams({
-                        'subject': subject,
-                        'difficulty': difficulty,
-                        'refresh': 'true'
-                    })
+        // Refresh questions button
+        document.getElementById('refresh-questions').addEventListener('click', function () {
+            const subject = document.getElementById('subject-hidden').value;
+            const difficulty = document.getElementById('difficulty-hidden').value;
+
+            // Show loading
+            loading.classList.remove('d-none');
+
+            // Send request to refresh questions
+            fetch('/generate_questions', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: new URLSearchParams({
+                    'subject': subject,
+                    'difficulty': difficulty,
+                    'refresh': 'true'
                 })
+            })
                 .then(response => response.json())
                 .then(data => {
                     loading.classList.add('d-none');
-                    
+
                     if (data.error) {
                         errorMessage.textContent = data.error;
                         errorMessage.classList.remove('d-none');
                         return;
                     }
-                    
+
                     // Display questions
                     const questionsContainer = document.getElementById('questions-container');
                     questionsContainer.innerHTML = '';
-                    
+
                     data.questions.forEach((question, index) => {
                         const questionCard = document.createElement('div');
                         questionCard.className = 'card mb-4 shadow-sm';
@@ -724,42 +931,42 @@
                     errorMessage.classList.remove('d-none');
                     console.error('Error:', error);
                 });
-            });
+        });
 
-            // Load more questions button
-            document.getElementById('load-more-questions').addEventListener('click', function() {
-                const subject = document.getElementById('subject-hidden').value;
-                const difficulty = document.getElementById('difficulty-hidden').value;
+        // Load more questions button
+        document.getElementById('load-more-questions').addEventListener('click', function () {
+            const subject = document.getElementById('subject-hidden').value;
+            const difficulty = document.getElementById('difficulty-hidden').value;
 
-                // Show loading
-                loading.classList.remove('d-none');
-                
-                // Send request to get more questions
-                fetch('/generate_questions', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                    },
-                    body: new URLSearchParams({
-                        'subject': subject,
-                        'difficulty': difficulty,
-                        'add_more': 'true'
-                    })
+            // Show loading
+            loading.classList.remove('d-none');
+
+            // Send request to get more questions
+            fetch('/generate_questions', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: new URLSearchParams({
+                    'subject': subject,
+                    'difficulty': difficulty,
+                    'add_more': 'true'
                 })
+            })
                 .then(response => response.json())
                 .then(data => {
                     loading.classList.add('d-none');
-                    
+
                     if (data.error) {
                         errorMessage.textContent = data.error;
                         errorMessage.classList.remove('d-none');
                         return;
                     }
-                    
+
                     // Get current number of questions
                     const questionsContainer = document.getElementById('questions-container');
                     const currentCount = questionsContainer.children.length;
-                    
+
                     // Append new questions
                     data.questions.forEach((question, index) => {
                         const questionCard = document.createElement('div');
@@ -785,8 +992,9 @@
                     errorMessage.classList.remove('d-none');
                     console.error('Error:', error);
                 });
-            });
         });
-    </script>
+    });
+</script>
 </body>
+
 </html>

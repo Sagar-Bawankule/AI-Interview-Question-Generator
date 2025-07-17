@@ -57,12 +57,18 @@ def register():
             flash('Username already taken', 'danger')
             return render_template('register.html')
         
+        # Prevent admin registration through normal registration process
+        admin_email = os.environ.get('ADMIN_EMAIL', 'admin@example.com')
+        if email == admin_email:
+            flash('This email cannot be used for registration', 'danger')
+            return render_template('register.html')
+        
         # Create new user
         user = User(
             username=username,
             email=email,
             password_hash=generate_password_hash(password),
-            is_admin=email == os.environ.get('ADMIN_EMAIL', 'admin@example.com')
+            is_admin=False  # Never set admin via registration
         )
         
         try:
@@ -114,7 +120,7 @@ def logout():
     logout_user()
     session.clear()
     flash('You have been logged out', 'info')
-    return redirect(url_for('auth.login'))
+    return redirect(url_for('index'))
 
 @auth_bp.route('/profile')
 @login_required

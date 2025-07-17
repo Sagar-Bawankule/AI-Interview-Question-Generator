@@ -1,55 +1,78 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quiz - AI Interview Question Generator</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/quiz.css') }}">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
+
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm fixed-top">
         <div class="container">
-            <a class="navbar-brand" href="{{ url_for('index') }}">AI Interview Question Generator</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <a class="navbar-brand fw-bold" href="{{ url_for('index') }}">
+                <i class="fas fa-brain me-2"></i>AI Interview Prep
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('dashboard') }}">Dashboard</a>
+                        <a class="nav-link" href="{{ url_for('dashboard') }}">
+                            <i class="fas fa-tachometer-alt me-1"></i> Dashboard
+                        </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link active" href="{{ url_for('index') }}">Practice</a>
+                        <a class="nav-link active" href="{{ url_for('quiz') }}">
+                            <i class="fas fa-question-circle me-1"></i> Practice
+                        </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('leaderboard') }}">Leaderboard</a>
+                        <a class="nav-link" href="{{ url_for('leaderboard') }}">
+                            <i class="fas fa-trophy me-1"></i> Leaderboard
+                        </a>
                     </li>
                     {% if current_user.is_admin %}
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="adminDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            Admin
+                        <a class="nav-link dropdown-toggle" href="#" id="adminDropdown" role="button"
+                            data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-user-shield me-1"></i> Admin
                         </a>
-                        <ul class="dropdown-menu" aria-labelledby="adminDropdown">
-                            <li><a class="dropdown-item" href="{{ url_for('admin.dashboard') }}">Admin Dashboard</a></li>
+                        <ul class="dropdown-menu dropdown-menu-end shadow-sm" aria-labelledby="adminDropdown">
+                            <li><a class="dropdown-item" href="{{ url_for('admin.dashboard') }}">Admin Dashboard</a>
+                            </li>
                             <li><a class="dropdown-item" href="{{ url_for('admin.users') }}">Manage Users</a></li>
                             <li><a class="dropdown-item" href="{{ url_for('admin.attempts') }}">View Attempts</a></li>
                         </ul>
                     </li>
                     {% endif %}
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            {{ current_user.username }}
+                        <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
+                            data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-user-circle me-1"></i> {{ current_user.username }}
                         </a>
-                        <ul class="dropdown-menu" aria-labelledby="userDropdown">
-                            <li><a class="dropdown-item" href="{{ url_for('auth.profile') }}">Profile</a></li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="{{ url_for('auth.logout') }}">Logout</a></li>
+                        <ul class="dropdown-menu dropdown-menu-end shadow-sm" aria-labelledby="userDropdown">
+                            <li><a class="dropdown-item" href="{{ url_for('auth.profile') }}">
+                                    <i class="fas fa-id-card me-2"></i> Profile
+                                </a></li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                            <li><a class="dropdown-item" href="{{ url_for('auth.logout') }}">
+                                    <i class="fas fa-sign-out-alt me-2"></i> Logout
+                                </a></li>
                         </ul>
                     </li>
                     <li class="nav-item">
-                        <button class="btn btn-outline-light btn-sm ms-2" id="themeToggle">
+                        <button class="btn btn-outline-light btn-sm ms-2 rounded-circle" id="themeToggle">
                             <span id="themeIcon">🌙</span>
                         </button>
                     </li>
@@ -58,117 +81,139 @@
         </div>
     </nav>
 
-    <div class="container my-5">
+    <div class="container main-content">
         {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                {% for category, message in messages %}
-                    <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show" role="alert">
-                        {{ message }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                    </div>
-                {% endfor %}
-            {% endif %}
+        {% if messages %}
+        {% for category, message in messages %}
+        <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show animate__animated animate__fadeInDown"
+            role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% endfor %}
+        {% endif %}
         {% endwith %}
 
         <div class="row">
-            <div class="col-lg-8 mx-auto">
-                <div class="card shadow">
+            <div class="col-lg-10 mx-auto">
+                <div class="card shadow-lg border-0 rounded-lg">
                     <div class="card-header bg-primary text-white">
-                        <h3 class="card-title mb-0">
+                        <h3 class="card-title mb-0 d-flex align-items-center">
                             <i class="fas fa-question-circle me-2"></i>
                             AI Interview Practice
                         </h3>
                     </div>
                     <div class="card-body">
                         <!-- Quiz Configuration -->
-                        <div id="quizConfig" class="mb-4">
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <label for="subject" class="form-label">Subject:</label>
-                                    <select class="form-select" id="subject" required>
-                                        <option value="">Select a subject</option>
-                                        <option value="Python Programming">Python Programming</option>
-                                        <option value="JavaScript">JavaScript</option>
-                                        <option value="Machine Learning">Machine Learning</option>
-                                        <option value="Data Science">Data Science</option>
-                                        <option value="Web Development">Web Development</option>
-                                        <option value="Database Management">Database Management</option>
-                                        <option value="System Design">System Design</option>
-                                        <option value="Algorithms">Algorithms</option>
-                                        <option value="Software Engineering">Software Engineering</option>
-                                        <option value="DevOps">DevOps</option>
-                                    </select>
+                        <div id="quizConfig" class="animate__animated animate__fadeIn">
+                            <div class="p-md-4">
+                                <h4 class="mb-4 text-center">Configure Your Practice Session</h4>
+                                <div class="row g-3">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="subject" class="form-label fw-bold">
+                                            <i class="fas fa-book me-2"></i>Subject:
+                                        </label>
+                                        <select class="form-select form-select-lg shadow-sm" id="subject" required>
+                                            <option value="">Select a subject</option>
+                                            <option value="Python Programming">Python Programming</option>
+                                            <option value="JavaScript">JavaScript</option>
+                                            <option value="Machine Learning">Machine Learning</option>
+                                            <option value="Data Science">Data Science</option>
+                                            <option value="Web Development">Web Development</option>
+                                            <option value="Database Management">Database Management</option>
+                                            <option value="System Design">System Design</option>
+                                            <option value="Algorithms">Algorithms</option>
+                                            <option value="Software Engineering">Software Engineering</option>
+                                            <option value="DevOps">DevOps</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="difficulty" class="form-label fw-bold">
+                                            <i class="fas fa-chart-line me-2"></i>Difficulty:
+                                        </label>
+                                        <select class="form-select form-select-lg shadow-sm" id="difficulty" required>
+                                            <option value="">Select difficulty</option>
+                                            <option value="Beginner">Beginner</option>
+                                            <option value="Intermediate">Intermediate</option>
+                                            <option value="Advanced">Advanced</option>
+                                        </select>
+                                    </div>
                                 </div>
-                                <div class="col-md-6 mb-3">
-                                    <label for="difficulty" class="form-label">Difficulty:</label>
-                                    <select class="form-select" id="difficulty" required>
-                                        <option value="">Select difficulty</option>
-                                        <option value="Beginner">Beginner</option>
-                                        <option value="Intermediate">Intermediate</option>
-                                        <option value="Advanced">Advanced</option>
-                                    </select>
+                                <div class="row g-3">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="numQuestions" class="form-label fw-bold">
+                                            <i class="fas fa-list-ol me-2"></i>Number of Questions:
+                                        </label>
+                                        <select class="form-select form-select-lg shadow-sm" id="numQuestions" required>
+                                            <option value="5">5 Questions</option>
+                                            <option value="10" selected>10 Questions</option>
+                                            <option value="15">15 Questions</option>
+                                            <option value="20">20 Questions</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="language" class="form-label fw-bold">
+                                            <i class="fas fa-language me-2"></i>Language:
+                                        </label>
+                                        <select class="form-select form-select-lg shadow-sm" id="language">
+                                            <option value="en" selected>English</option>
+                                            <option value="hi">Hindi (हिंदी)</option>
+                                            <option value="mr">Marathi (मराठी)</option>
+                                        </select>
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <label for="numQuestions" class="form-label">Number of Questions:</label>
-                                    <select class="form-select" id="numQuestions" required>
-                                        <option value="5">5 Questions</option>
-                                        <option value="10" selected>10 Questions</option>
-                                        <option value="15">15 Questions</option>
-                                        <option value="20">20 Questions</option>
-                                    </select>
+                                <div class="mt-4">
+                                    <div class="d-grid gap-2">
+                                        <button class="btn btn-primary btn-lg py-3 rounded-pill shadow-sm"
+                                            onclick="generateQuestions()">
+                                            <i class="fas fa-cogs me-2"></i>Generate Questions
+                                        </button>
+                                    </div>
                                 </div>
-                                <div class="col-md-6 mb-3">
-                                    <label for="language" class="form-label">Language:</label>
-                                    <select class="form-select" id="language">
-                                        <option value="en" selected>English</option>
-                                        <option value="hi">Hindi (हिंदी)</option>
-                                        <option value="mr">Marathi (मराठी)</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="d-grid gap-2">
-                                <button class="btn btn-primary btn-lg" onclick="generateQuestions()">
-                                    <i class="fas fa-cogs me-2"></i>Generate Questions
-                                </button>
                             </div>
                         </div>
 
                         <!-- Questions Display -->
-                        <div id="questionsSection" style="display: none;">
-                            <div class="d-flex justify-content-between align-items-center mb-3">
-                                <h4>Interview Questions</h4>
-                                <div class="btn-group" role="group">
-                                    <button class="btn btn-outline-secondary btn-sm" onclick="downloadQuestionsPDF()">
-                                        <i class="fas fa-download me-1"></i>Download PDF
-                                    </button>
-                                    <button class="btn btn-outline-primary btn-sm" onclick="refreshQuestions()">
-                                        <i class="fas fa-sync-alt me-1"></i>Refresh Questions
-                                    </button>
-                                    <button class="btn btn-outline-info btn-sm" onclick="loadMoreQuestions()">
-                                        <i class="fas fa-plus me-1"></i>Load 5 More
-                                    </button>
+                        <div id="questionsSection" class="animate__animated animate__fadeIn" style="display: none;">
+                            <div class="px-md-4 py-3">
+                                <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap">
+                                    <h4 class="mb-0"><i class="fas fa-list-alt me-2"></i>Interview Questions</h4>
+                                    <div class="btn-group mt-2 mt-md-0" role="group">
+                                        <button class="btn btn-outline-secondary" onclick="downloadQuestionsPDF()">
+                                            <i class="fas fa-download me-1"></i>Download PDF
+                                        </button>
+                                        <button class="btn btn-outline-primary" onclick="refreshQuestions()">
+                                            <i class="fas fa-sync-alt me-1"></i>Refresh Questions
+                                        </button>
+                                        <button class="btn btn-outline-info" onclick="loadMoreQuestions()">
+                                            <i class="fas fa-plus me-1"></i>Load 5 More
+                                        </button>
+                                    </div>
                                 </div>
-                            </div>
-                            
-                            <div id="questionsList"></div>
-                            
-                            <div class="mt-4">
-                                <div class="d-grid gap-2">
-                                    <button class="btn btn-success btn-lg" onclick="submitAnswers()">
-                                        <i class="fas fa-check me-2"></i>Submit Answers for Evaluation
-                                    </button>
+
+                                <div id="questionsList" class="question-list"></div>
+
+                                <div class="mt-4 mb-2">
+                                    <div class="d-grid gap-2">
+                                        <button class="btn btn-success btn-lg py-3 rounded-pill shadow-sm"
+                                            onclick="submitAnswers()">
+                                            <i class="fas fa-check me-2"></i>Submit Answers for Evaluation
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
 
                         <!-- Loading Spinner -->
-                        <div id="loadingSpinner" class="text-center" style="display: none;">
-                            <div class="spinner-border text-primary" role="status">
-                                <span class="visually-hidden">Loading...</span>
+                        <div id="loadingSpinner" class="text-center py-5 my-4" style="display: none;">
+                            <div class="spinner-container">
+                                <div class="spinner-border text-primary" role="status"
+                                    style="width: 3rem; height: 3rem;">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                                <p class="mt-3 lead">Generating your personalized interview questions...</p>
+                                <p class="text-muted">This may take a few moments</p>
                             </div>
-                            <p class="mt-2">Generating questions using AI...</p>
                         </div>
                     </div>
                 </div>
@@ -177,66 +222,77 @@
     </div>
 
     <!-- Session Timeout Modal -->
-    <div class="modal fade" id="sessionTimeoutModal" tabindex="-1" aria-labelledby="sessionTimeoutModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
+    <div class="modal fade" id="sessionTimeoutModal" tabindex="-1" aria-labelledby="sessionTimeoutModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="sessionTimeoutModalLabel">Session Timeout</h5>
+                <div class="modal-header bg-warning text-dark">
+                    <h5 class="modal-title" id="sessionTimeoutModalLabel">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        Session Timeout Warning
+                    </h5>
                 </div>
                 <div class="modal-body">
-                    Your session is about to expire due to inactivity. You will be automatically logged out in <span id="countdown">60</span> seconds.
+                    <p>Your session is about to expire due to inactivity.</p>
+                    <p class="mb-0">You will be automatically logged out in <span id="countdown"
+                            class="fw-bold">60</span> seconds.</p>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" onclick="extendSession()">Stay Logged In</button>
-                    <button type="button" class="btn btn-secondary" onclick="logoutNow()">Logout Now</button>
+                    <button type="button" class="btn btn-primary" onclick="extendSession()">
+                        <i class="fas fa-hourglass-half me-2"></i>Stay Logged In
+                    </button>
+                    <button type="button" class="btn btn-secondary" onclick="logoutNow()">
+                        <i class="fas fa-sign-out-alt me-2"></i>Logout Now
+                    </button>
                 </div>
             </div>
         </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://kit.fontawesome.com/your-fontawesome-kit.js" crossorigin="anonymous"></script>
-    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
     <script>
         let currentQuestions = [];
         let sessionTimeoutTimer;
         let countdownTimer;
 
         // Theme toggle functionality
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             const themeToggle = document.getElementById('themeToggle');
             const themeIcon = document.getElementById('themeIcon');
-            
+
             // Load saved theme
             const savedTheme = localStorage.getItem('theme') || 'light';
             document.documentElement.setAttribute('data-theme', savedTheme);
             updateThemeIcon(savedTheme);
-            
-            themeToggle.addEventListener('click', function() {
+
+            themeToggle.addEventListener('click', function () {
                 const currentTheme = document.documentElement.getAttribute('data-theme');
                 const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-                
+
                 document.documentElement.setAttribute('data-theme', newTheme);
                 localStorage.setItem('theme', newTheme);
                 updateThemeIcon(newTheme);
-                
+
                 // Send theme update to server
                 fetch('/api/theme', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({theme: newTheme})
+                    body: JSON.stringify({ theme: newTheme })
                 });
             });
-            
+
             // Initialize session timeout
             initSessionTimeout();
         });
 
         function updateThemeIcon(theme) {
             const themeIcon = document.getElementById('themeIcon');
-            themeIcon.textContent = theme === 'dark' ? '☀️' : '🌙';
+            if (themeIcon) {
+                themeIcon.textContent = theme === 'dark' ? '☀️' : '🌙';
+            }
         }
 
         function generateQuestions() {
@@ -268,22 +324,22 @@
                 },
                 body: JSON.stringify(requestData)
             })
-            .then(response => response.json())
-            .then(data => {
-                document.getElementById('loadingSpinner').style.display = 'none';
-                if (data.success) {
-                    currentQuestions = data.questions;
-                    displayQuestions(data.questions);
-                    document.getElementById('questionsSection').style.display = 'block';
-                } else {
-                    alert('Error generating questions: ' + data.error);
-                }
-            })
-            .catch(error => {
-                document.getElementById('loadingSpinner').style.display = 'none';
-                console.error('Error:', error);
-                alert('An error occurred while generating questions.');
-            });
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('loadingSpinner').style.display = 'none';
+                    if (data.success) {
+                        currentQuestions = data.questions;
+                        displayQuestions(data.questions);
+                        document.getElementById('questionsSection').style.display = 'block';
+                    } else {
+                        alert('Error generating questions: ' + data.error);
+                    }
+                })
+                .catch(error => {
+                    document.getElementById('loadingSpinner').style.display = 'none';
+                    console.error('Error:', error);
+                    alert('An error occurred while generating questions.');
+                });
         }
 
         function refreshQuestions() {
@@ -317,21 +373,21 @@
                 },
                 body: JSON.stringify(requestData)
             })
-            .then(response => response.json())
-            .then(data => {
-                document.getElementById('loadingSpinner').style.display = 'none';
-                if (data.success) {
-                    currentQuestions = currentQuestions.concat(data.questions);
-                    displayQuestions(currentQuestions);
-                } else {
-                    alert('Error loading more questions: ' + data.error);
-                }
-            })
-            .catch(error => {
-                document.getElementById('loadingSpinner').style.display = 'none';
-                console.error('Error:', error);
-                alert('An error occurred while loading more questions.');
-            });
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('loadingSpinner').style.display = 'none';
+                    if (data.success) {
+                        currentQuestions = currentQuestions.concat(data.questions);
+                        displayQuestions(currentQuestions);
+                    } else {
+                        alert('Error loading more questions: ' + data.error);
+                    }
+                })
+                .catch(error => {
+                    document.getElementById('loadingSpinner').style.display = 'none';
+                    console.error('Error:', error);
+                    alert('An error occurred while loading more questions.');
+                });
         }
 
         function displayQuestions(questions) {
@@ -342,13 +398,12 @@
                 const questionDiv = document.createElement('div');
                 questionDiv.className = 'card mb-3';
                 questionDiv.innerHTML = `
-                    <div class="card-body">
-                        <h5 class="card-title">Question ${index + 1}</h5>
-                        <p class="card-text">${question}</p>
-                        <textarea class="form-control" id="answer_${index}" rows="4" 
-                                  placeholder="Enter your answer here..."></textarea>
-                    </div>
-                `;
+    <div class="card-body">
+        <h5 class="card-title">Question ${index + 1}</h5>
+        <p class="card-text">${question}</p>
+        <textarea class="form-control" id="answer_${index}" rows="4" placeholder="Enter your answer here..."></textarea>
+    </div>
+    `;
                 questionsList.appendChild(questionDiv);
             });
         }
@@ -372,21 +427,21 @@
                 },
                 body: JSON.stringify(requestData)
             })
-            .then(response => response.blob())
-            .then(blob => {
-                const url = window.URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.style.display = 'none';
-                a.href = url;
-                a.download = 'interview_questions.pdf';
-                document.body.appendChild(a);
-                a.click();
-                window.URL.revokeObjectURL(url);
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('An error occurred while downloading the PDF.');
-            });
+                .then(response => response.blob())
+                .then(blob => {
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.style.display = 'none';
+                    a.href = url;
+                    a.download = 'interview_questions.pdf';
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('An error occurred while downloading the PDF.');
+                });
         }
 
         function submitAnswers() {
@@ -425,21 +480,21 @@
                 },
                 body: JSON.stringify(requestData)
             })
-            .then(response => response.json())
-            .then(data => {
-                document.getElementById('loadingSpinner').style.display = 'none';
-                if (data.success) {
-                    alert('Answers evaluated successfully! Redirecting to results...');
-                    window.location.href = `/attempt/${data.attempt_id}`;
-                } else {
-                    alert('Error evaluating answers: ' + (data.error || 'Unknown error'));
-                }
-            })
-            .catch(error => {
-                document.getElementById('loadingSpinner').style.display = 'none';
-                console.error('Error:', error);
-                alert('An error occurred while evaluating answers.');
-            });
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('loadingSpinner').style.display = 'none';
+                    if (data.success) {
+                        alert('Answers evaluated successfully! Redirecting to results...');
+                        window.location.href = `/attempt/${data.attempt_id}`;
+                    } else {
+                        alert('Error evaluating answers: ' + (data.error || 'Unknown error'));
+                    }
+                })
+                .catch(error => {
+                    document.getElementById('loadingSpinner').style.display = 'none';
+                    console.error('Error:', error);
+                    alert('An error occurred while evaluating answers.');
+                });
         }
 
         // Session timeout management
@@ -473,7 +528,7 @@
         function showSessionWarning() {
             const modal = new bootstrap.Modal(document.getElementById('sessionTimeoutModal'));
             modal.show();
-            
+
             let countdown = 60;
             countdownTimer = setInterval(() => {
                 countdown--;
@@ -489,15 +544,14 @@
             clearInterval(countdownTimer);
             const modal = bootstrap.Modal.getInstance(document.getElementById('sessionTimeoutModal'));
             modal.hide();
-            
             // Reset session timer by making a request to the server
-            fetch('/dashboard', {method: 'GET'});
+            fetch('/dashboard', { method: 'GET' });
         }
 
         function logoutNow() {
             clearInterval(countdownTimer);
             window.location.href = '/auth/logout';
-        }
-    </script>
+        }    </script>
 </body>
+
 </html>

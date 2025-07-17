@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Interview Question Generator & Evaluator</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/footer.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/landing.css') }}">
+</head>
+
+<body class="landing-page">
+    <!-- Main Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-transparent position-absolute w-100 top-0 z-index-1000">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="/">
+                <i class="fas fa-brain me-2"></i>AI Interview Prep
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    {% if current_user.is_authenticated %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('dashboard') }}">
+                            <i class="fas fa-tachometer-alt me-1"></i> Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('quiz') }}">
+                            <i class="fas fa-question-circle me-1"></i> Practice
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('leaderboard') }}">
+                            <i class="fas fa-trophy me-1"></i> Leaderboard
+                        </a>
+                    </li>
+                    {% if current_user.is_admin %}
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="adminDropdown" role="button"
+                            data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-user-shield me-1"></i> Admin
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end shadow-sm" aria-labelledby="adminDropdown">
+                            <li><a class="dropdown-item" href="{{ url_for('admin.dashboard') }}">Admin Dashboard</a>
+                            </li>
+                            <li><a class="dropdown-item" href="{{ url_for('admin.users') }}">Manage Users</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('admin.attempts') }}">View Attempts</a></li>
+                        </ul>
+                    </li>
+                    {% endif %}
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
+                            data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-user-circle me-1"></i> {{ current_user.username }}
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="userDropdown">
+                            <li><a class="dropdown-item" href="{{ url_for('auth.profile') }}">
+                                    <i class="fas fa-id-card me-2"></i> Profile
+                                </a></li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                            <li><a class="dropdown-item" href="{{ url_for('auth.logout') }}">
+                                    <i class="fas fa-sign-out-alt me-2"></i> Logout
+                                </a></li>
+                        </ul>
+                    </li>
+                    {% else %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="#features">
+                            <i class="fas fa-star me-1"></i> Features
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#how-it-works">
+                            <i class="fas fa-info-circle me-1"></i> How It Works
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/auth/login">
+                            <i class="fas fa-sign-in-alt me-1"></i> Login
+                        </a>
+                    </li>
+                    <li class="nav-item ms-2">
+                        <a href="/auth/register" class="btn btn-light text-primary px-3 rounded-pill">
+                            <i class="fas fa-user-plus me-1"></i> Sign Up
+                        </a>
+                    </li>
+                    {% endif %}
+                    <li class="nav-item ms-2">
+                        <button id="themeToggle" class="btn btn-sm btn-outline-light rounded-circle">
+                            <span id="themeIcon">🌙</span>
+                        </button>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero-section position-relative">
+        <div class="hero-bg-animation"></div>
+        <div class="container h-100 position-relative">
+            <div class="row h-100 align-items-center">
+                <div class="col-lg-6 text-white">
+                    <h1 class="display-4 fw-bold mb-4 animate__animated animate__fadeInUp">
+                        Ace Your Technical Interviews with AI
+                    </h1>
+                    <p class="lead mb-4 animate__animated animate__fadeInUp" data-delay="0.2">
+                        Prepare for your next job interview with our AI-powered platform that generates
+                        personalized questions and provides real-time feedback on your answers.
+                    </p>
+                    <div class="d-flex gap-3 animate__animated animate__fadeInUp" data-delay="0.4">
+                        <a href="/auth/register" class="btn btn-light btn-lg rounded-pill shadow-sm">
+                            <i class="fas fa-rocket me-2"></i>Get Started Free
+                        </a>
+                        <a href="#how-it-works" class="btn btn-outline-light btn-lg rounded-pill">
+                            <i class="fas fa-play me-2"></i>How It Works
+                        </a>
+                    </div>
+                    <div class="mt-5 d-flex align-items-center animate__animated animate__fadeInUp" data-delay="0.6">
+                        <div class="d-flex">
+                            <div class="user-circle user-circle-1">
+                                <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="User">
+                            </div>
+                            <div class="user-circle user-circle-2">
+                                <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="User">
+                            </div>
+                            <div class="user-circle user-circle-3">
+                                <img src="https://randomuser.me/api/portraits/men/58.jpg" alt="User">
+                            </div>
+                        </div>
+                        <div class="ms-3">
+                            <span class="text-light">Trusted by <span class="fw-bold">{{ stats.total_users }}</span>
+                                users worldwide</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6 d-none d-lg-block">
+                    <div class="hero-image-container position-relative animate__animated animate__fadeIn"
+                        data-delay="0.5">
+                        <img src="https://images.unsplash.com/photo-1573497620053-ea5300f94f21?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80"
+                            alt="Interview Preparation" class="img-fluid rounded-5 shadow-lg">
+                        <div class="floating-card floating-card-1 animate__animated animate__fadeInUp shadow">
+                            <div class="d-flex align-items-center">
+                                <div class="floating-icon bg-primary text-white rounded-circle">
+                                    <i class="fas fa-robot"></i>
+                                </div>
+                                <div class="ms-3">
+                                    <h6 class="mb-0">AI-Powered Questions</h6>
+                                    <p class="text-muted small mb-0">Tailored to your needs</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="floating-card floating-card-2 animate__animated animate__fadeInUp shadow"
+                            data-delay="0.3">
+                            <div class="d-flex align-items-center">
+                                <div class="floating-icon bg-success text-white rounded-circle">
+                                    <i class="fas fa-check-circle"></i>
+                                </div>
+                                <div class="ms-3">
+                                    <h6 class="mb-0">Instant Feedback</h6>
+                                    <p class="text-muted small mb-0">Improve in real-time</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="hero-wave">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320">
+                <path fill="#ffffff" fill-opacity="1"
+                    d="M0,96L48,112C96,128,192,160,288,186.7C384,213,480,235,576,218.7C672,203,768,149,864,144C960,139,1056,181,1152,197.3C1248,213,1344,203,1392,197.3L1440,192L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z">
+                </path>
+            </svg>
+        </div>
+    </section>
+
+    <!-- Statistics Section -->
+    <section class="py-5" id="stats">
+        <div class="container">
+            <div class="row text-center">
+                <div class="col-md-4 mb-4 reveal-on-scroll" data-animation="animate__fadeIn">
+                    <div class="stat-card p-4">
+                        <div class="stat-icon mb-3">
+                            <i class="fas fa-users fa-2x text-primary"></i>
+                        </div>
+                        <h3 class="counter-value fw-bold" data-target="{{ stats.total_users }}">0</h3>
+                        <p class="text-muted">Active Users</p>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-4 reveal-on-scroll" data-animation="animate__fadeIn" data-delay="0.2">
+                    <div class="stat-card p-4">
+                        <div class="stat-icon mb-3">
+                            <i class="fas fa-clipboard-check fa-2x text-success"></i>
+                        </div>
+                        <h3 class="counter-value fw-bold" data-target="{{ stats.total_attempts }}">0</h3>
+                        <p class="text-muted">Practice Sessions</p>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-4 reveal-on-scroll" data-animation="animate__fadeIn" data-delay="0.4">
+                    <div class="stat-card p-4">
+                        <div class="stat-icon mb-3">
+                            <i class="fas fa-question-circle fa-2x text-info"></i>
+                        </div>
+                        <h3 class="counter-value fw-bold" data-target="{{ stats.total_questions }}">0</h3>
+                        <p class="text-muted">Questions Answered</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="py-5 bg-light" id="features">
+        <div class="container py-4">
+            <div class="text-center mb-5">
+                <h2 class="fw-bold mb-3">Why Choose Our Platform?</h2>
+                <p class="lead text-muted mx-auto" style="max-width: 700px;">
+                    We combine the latest AI technology with expert-designed interview preparation techniques
+                    to help you succeed in technical interviews.
+                </p>
+            </div>
+            <div class="row g-4">
+                <div class="col-lg-4 col-md-6 reveal-on-scroll" data-animation="animate__fadeInUp">
+                    <div class="card h-100 border-0 hover-card shadow-sm">
+                        <div class="card-body p-4 text-center">
+                            <div class="feature-icon-wrapper mb-3">
+                                <i class="fas fa-brain fa-2x text-primary"></i>
+                            </div>
+                            <h4 class="fw-bold mb-3">AI Question Generator</h4>
+                            <p class="text-muted">
+                                Our advanced AI creates personalized technical interview questions across multiple
+                                subjects and difficulty levels.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6 reveal-on-scroll" data-animation="animate__fadeInUp" data-delay="0.2">
+                    <div class="card h-100 border-0 hover-card shadow-sm">
+                        <div class="card-body p-4 text-center">
+                            <div class="feature-icon-wrapper mb-3">
+                                <i class="fas fa-comment-dots fa-2x text-primary"></i>
+                            </div>
+                            <h4 class="fw-bold mb-3">Smart Answer Evaluation</h4>
+                            <p class="text-muted">
+                                Get instant feedback on your answers with detailed analysis and suggestions for
+                                improvement.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6 reveal-on-scroll" data-animation="animate__fadeInUp" data-delay="0.4">
+                    <div class="card h-100 border-0 hover-card shadow-sm">
+                        <div class="card-body p-4 text-center">
+                            <div class="feature-icon-wrapper mb-3">
+                                <i class="fas fa-chart-line fa-2x text-primary"></i>
+                            </div>
+                            <h4 class="fw-bold mb-3">Progress Tracking</h4>
+                            <p class="text-muted">
+                                Monitor your improvement over time with detailed performance analytics and personalized
+                                insights.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6 reveal-on-scroll" data-animation="animate__fadeInUp" data-delay="0.2">
+                    <div class="card h-100 border-0 hover-card shadow-sm">
+                        <div class="card-body p-4 text-center">
+                            <div class="feature-icon-wrapper mb-3">
+                                <i class="fas fa-trophy fa-2x text-primary"></i>
+                            </div>
+                            <h4 class="fw-bold mb-3">Competitive Leaderboard</h4>
+                            <p class="text-muted">
+                                Compare your performance with other users and stay motivated with our community
+                                leaderboard.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6 reveal-on-scroll" data-animation="animate__fadeInUp" data-delay="0.4">
+                    <div class="card h-100 border-0 hover-card shadow-sm">
+                        <div class="card-body p-4 text-center">
+                            <div class="feature-icon-wrapper mb-3">
+                                <i class="fas fa-laptop-code fa-2x text-primary"></i>
+                            </div>
+                            <h4 class="fw-bold mb-3">Wide Range of Topics</h4>
+                            <p class="text-muted">
+                                Practice with questions covering Python, JavaScript, SQL, Data Structures, Algorithms,
+                                and many more.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6 reveal-on-scroll" data-animation="animate__fadeInUp" data-delay="0.6">
+                    <div class="card h-100 border-0 hover-card shadow-sm">
+                        <div class="card-body p-4 text-center">
+                            <div class="feature-icon-wrapper mb-3">
+                                <i class="fas fa-mobile-alt fa-2x text-primary"></i>
+                            </div>
+                            <h4 class="fw-bold mb-3">Mobile Friendly</h4>
+                            <p class="text-muted">
+                                Practice anywhere, anytime with our fully responsive design that works on all devices.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works Section -->
+    <section class="py-5" id="how-it-works">
+        <div class="container py-4">
+            <div class="text-center mb-5">
+                <h2 class="fw-bold mb-3">How It Works</h2>
+                <p class="lead text-muted mx-auto" style="max-width: 700px;">
+                    Our simple 3-step process helps you prepare effectively for your next technical interview.
+                </p>
+            </div>
+            <div class="row g-4 align-items-center">
+                <div class="col-lg-4 text-center reveal-on-scroll" data-animation="animate__fadeInUp">
+                    <div class="step-circle bg-primary text-white mx-auto mb-4">1</div>
+                    <h4 class="fw-bold mb-3">Select Your Topic</h4>
+                    <p class="text-muted">
+                        Choose from a wide range of technical subjects and set your desired difficulty level.
+                    </p>
+                </div>
+                <div class="col-lg-4 text-center reveal-on-scroll" data-animation="animate__fadeInUp" data-delay="0.2">
+                    <div class="step-circle bg-primary text-white mx-auto mb-4">2</div>
+                    <h4 class="fw-bold mb-3">Answer Questions</h4>
+                    <p class="text-muted">
+                        Respond to AI-generated interview questions that simulate real-world scenarios.
+                    </p>
+                </div>
+                <div class="col-lg-4 text-center reveal-on-scroll" data-animation="animate__fadeInUp" data-delay="0.4">
+                    <div class="step-circle bg-primary text-white mx-auto mb-4">3</div>
+                    <h4 class="fw-bold mb-3">Get Feedback</h4>
+                    <p class="text-muted">
+                        Receive detailed evaluations of your answers and track your progress over time.
+                    </p>
+                </div>
+            </div>
+            <div class="text-center mt-5 reveal-on-scroll" data-animation="animate__fadeIn" data-delay="0.6">
+                <a href="/quiz" class="btn btn-primary btn-lg rounded-pill px-5 shadow">
+                    <i class="fas fa-rocket me-2"></i>Start Practicing Now
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Popular Topics Section -->
+    <section class="py-5 bg-light">
+        <div class="container py-4">
+            <div class="text-center mb-5">
+                <h2 class="fw-bold mb-3">Popular Interview Topics</h2>
+                <p class="lead text-muted mx-auto" style="max-width: 700px;">
+                    Prepare for interviews across these in-demand technical areas
+                </p>
+            </div>
+            <div class="row g-4">
+                {% if stats.popular_subjects %}
+                {% for subject, count in stats.popular_subjects %}
+                <div class="col-lg-3 col-md-4 col-sm-6 reveal-on-scroll" data-animation="animate__fadeIn"
+                    data-delay="{{ loop.index0 * 0.1 }}">
+                    <div class="card h-100 border-0 hover-card shadow-sm">
+                        <div class="card-body p-4 text-center">
+                            <div class="topic-icon-wrapper mb-3">
+                                <i class="fas fa-code fa-2x text-primary"></i>
+                            </div>
+                            <h5 class="fw-bold mb-2">{{ subject }}</h5>
+                            <p class="text-muted small mb-0">{{ count }} practice sessions</p>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+                {% else %}
+                <div class="col-lg-3 col-md-4 col-sm-6 reveal-on-scroll" data-animation="animate__fadeIn">
+                    <div class="card h-100 border-0 hover-card shadow-sm">
+                        <div class="card-body p-4 text-center">
+                            <div class="topic-icon-wrapper mb-3">
+                                <i class="fab fa-python fa-2x text-primary"></i>
+                            </div>
+                            <h5 class="fw-bold mb-2">Python</h5>
+                            <p class="text-muted small mb-0">Most popular language</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-4 col-sm-6 reveal-on-scroll" data-animation="animate__fadeIn"
+                    data-delay="0.1">
+                    <div class="card h-100 border-0 hover-card shadow-sm">
+                        <div class="card-body p-4 text-center">
+                            <div class="topic-icon-wrapper mb-3">
+                                <i class="fab fa-js fa-2x text-primary"></i>
+                            </div>
+                            <h5 class="fw-bold mb-2">JavaScript</h5>
+                            <p class="text-muted small mb-0">Web development essential</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-4 col-sm-6 reveal-on-scroll" data-animation="animate__fadeIn"
+                    data-delay="0.2">
+                    <div class="card h-100 border-0 hover-card shadow-sm">
+                        <div class="card-body p-4 text-center">
+                            <div class="topic-icon-wrapper mb-3">
+                                <i class="fas fa-database fa-2x text-primary"></i>
+                            </div>
+                            <h5 class="fw-bold mb-2">SQL</h5>
+                            <p class="text-muted small mb-0">Database fundamentals</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-4 col-sm-6 reveal-on-scroll" data-animation="animate__fadeIn"
+                    data-delay="0.3">
+                    <div class="card h-100 border-0 hover-card shadow-sm">
+                        <div class="card-body p-4 text-center">
+                            <div class="topic-icon-wrapper mb-3">
+                                <i class="fas fa-project-diagram fa-2x text-primary"></i>
+                            </div>
+                            <h5 class="fw-bold mb-2">Data Structures</h5>
+                            <p class="text-muted small mb-0">Essential CS knowledge</p>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </section>
+
+    <!-- Call to Action -->
+    <section class="py-5 bg-gradient-primary text-white">
+        <div class="container py-4 text-center">
+            <h2 class="fw-bold mb-4 animate__animated animate__fadeIn">Ready to Ace Your Next Interview?</h2>
+            <p class="lead mb-4 mx-auto animate__animated animate__fadeIn"
+                style="max-width: 700px; animation-delay: 0.2s">
+                Join thousands of professionals who are improving their interview skills with our AI-powered platform.
+            </p>
+            <div class="d-flex justify-content-center gap-3 animate__animated animate__fadeIn"
+                style="animation-delay: 0.4s">
+                <a href="/quiz" class="btn btn-light btn-lg px-5 rounded-pill shadow">
+                    <i class="fas fa-rocket me-2"></i>Start Practicing Now
+                </a>
+                <a href="/auth/login" class="btn btn-outline-light btn-lg px-5 rounded-pill">
+                    <i class="fas fa-sign-in-alt me-2"></i>Login
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gradient-dark text-white py-5">
+        <div class="container">
+            <div class="row g-4">
+                <div class="col-lg-4 col-md-6">
+                    <h5 class="fw-bold mb-3">AI Interview Question Generator</h5>
+                    <p class="text-light-muted">Powered by advanced AI technology to help you ace your technical
+                        interviews and improve your skills.</p>
+                    <div class="d-flex gap-3 mt-4">
+                        <a href="#" class="text-white social-icon"><i class="fab fa-github"></i></a>
+                        <a href="#" class="text-white social-icon"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="text-white social-icon"><i class="fab fa-linkedin"></i></a>
+                        <a href="#" class="text-white social-icon"><i class="fab fa-discord"></i></a>
+                    </div>
+                </div>
+                <div class="col-lg-2 col-md-6">
+                    <h6 class="fw-bold mb-3">Quick Links</h6>
+                    <ul class="list-unstyled footer-links">
+                        <li><a href="/" class="footer-link"><i class="fas fa-home me-2"></i>Home</a></li>
+                        {% if current_user.is_authenticated %}
+                        <li><a href="/dashboard" class="footer-link"><i
+                                    class="fas fa-tachometer-alt me-2"></i>Dashboard</a></li>
+                        <li><a href="/quiz" class="footer-link"><i class="fas fa-question-circle me-2"></i>Practice</a>
+                        </li>
+                        <li><a href="/leaderboard" class="footer-link"><i class="fas fa-trophy me-2"></i>Leaderboard</a>
+                        </li>
+                        {% else %}
+                        <li><a href="/auth/login" class="footer-link"><i class="fas fa-sign-in-alt me-2"></i>Login</a>
+                        </li>
+                        <li><a href="/auth/register" class="footer-link"><i
+                                    class="fas fa-user-plus me-2"></i>Register</a></li>
+                        {% endif %}
+                    </ul>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <h6 class="fw-bold mb-3">Popular Topics</h6>
+                    <div class="d-flex flex-wrap gap-2">
+                        <a href="#"
+                            class="badge bg-primary bg-opacity-25 text-primary px-3 py-2 rounded-pill">Python</a>
+                        <a href="#"
+                            class="badge bg-primary bg-opacity-25 text-primary px-3 py-2 rounded-pill">JavaScript</a>
+                        <a href="#" class="badge bg-primary bg-opacity-25 text-primary px-3 py-2 rounded-pill">SQL</a>
+                        <a href="#" class="badge bg-primary bg-opacity-25 text-primary px-3 py-2 rounded-pill">Data
+                            Structures</a>
+                        <a href="#" class="badge bg-primary bg-opacity-25 text-primary px-3 py-2 rounded-pill">Machine
+                            Learning</a>
+                        <a href="#" class="badge bg-primary bg-opacity-25 text-primary px-3 py-2 rounded-pill">Web
+                            Dev</a>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <h6 class="fw-bold mb-3">Newsletter</h6>
+                    <p class="small text-light-muted">Subscribe to receive updates, new features, and interview tips.
+                    </p>
+                    <form class="newsletter-form mt-3">
+                        <div class="input-group">
+                            <input type="email" class="form-control" placeholder="Your email" aria-label="Your email">
+                            <button class="btn btn-primary" type="submit"><i class="fas fa-paper-plane"></i></button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <hr class="mt-4 mb-3 border-light opacity-10">
+            <div class="row align-items-center">
+                <div class="col-md-6 text-center text-md-start">
+                    <p class="small text-light-muted mb-md-0">© 2025 AI Interview Question Generator. All rights
+                        reserved.</p>
+                </div>
+                <div class="col-md-6 text-center text-md-end">
+                    <a href="#" class="text-decoration-none small text-light-muted me-3">Privacy Policy</a>
+                    <a href="#" class="text-decoration-none small text-light-muted me-3">Terms of Service</a>
+                    <a href="#" class="text-decoration-none small text-light-muted">Contact Us</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+    <script src="{{ url_for('static', filename='js/landing.js') }}"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Fix for theme toggle button
+            const themeToggle = document.getElementById('themeToggle');
+            const themeIcon = document.getElementById('themeIcon');
+            let darkMode = localStorage.getItem('darkMode') === 'true';
+
+            // Apply theme on page load
+            if (darkMode) {
+                document.body.classList.add('dark-mode');
+                themeIcon.textContent = '☀️';
+            }
+
+            // Theme toggle functionality
+            themeToggle.addEventListener('click', function () {
+                darkMode = !darkMode;
+                document.body.classList.toggle('dark-mode');
+                themeIcon.textContent = darkMode ? '☀️' : '🌙';
+                localStorage.setItem('darkMode', darkMode);
+            });
+
+            // Smooth scrolling for anchor links
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const targetId = this.getAttribute('href');
+                    if (targetId === '#') return;
+
+                    const targetElement = document.querySelector(targetId);
+                    if (targetElement) {
+                        window.scrollTo({
+                            top: targetElement.offsetTop - 80,
+                            behavior: 'smooth'
+                        });
+                    }
+                });
+            });
+
+            // Counter animation for statistics
+            const counters = document.querySelectorAll('.counter-value');
+            const options = {
+                root: null,
+                rootMargin: '0px',
+                threshold: 0.1
+            };
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const target = parseInt(entry.target.getAttribute('data-target'));
+                        let count = 0;
+                        const updateCount = () => {
+                            const increment = target / 100;
+                            if (count < target) {
+                                count += increment;
+                                entry.target.textContent = Math.ceil(count);
+                                setTimeout(updateCount, 10);
+                            } else {
+                                entry.target.textContent = target;
+                            }
+                        };
+                        updateCount();
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, options);
+
+            counters.forEach(counter => {
+                observer.observe(counter);
+            });
+
+            // Animation on scroll
+            const revealElements = document.querySelectorAll('.reveal-on-scroll');
+            const revealObserver = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const el = entry.target;
+                        const animation = el.dataset.animation || 'animate__fadeIn';
+                        const delay = el.dataset.delay || 0;
+
+                        setTimeout(() => {
+                            el.classList.add('animate__animated', animation);
+                            el.style.opacity = 1;
+                        }, delay * 1000);
+
+                        revealObserver.unobserve(el);
+                    }
+                });
+            }, {
+                threshold: 0.1
+            });
+
+            revealElements.forEach(el => {
+                el.style.opacity = 0;
+                revealObserver.observe(el);
+            });
+
+            // Fix all URL links to ensure they work properly
+            const startPracticeButtons = document.querySelectorAll('a[href="/quiz"], a.btn:contains("Start Practicing Now")');
+            startPracticeButtons.forEach(button => {
+                // Make sure all practice buttons point to /quiz
+                button.href = '/quiz';
+            });
+
+            // Make sure login buttons work properly
+            const loginButtons = document.querySelectorAll('a[href="/auth/login"]');
+            loginButtons.forEach(button => {
+                button.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    window.location.href = '/auth/login';
+                });
+            });
+
+            // Remove the jQuery-style selector that may not be working
+            document.querySelectorAll('.btn-primary.btn-lg').forEach(btn => {
+                if (btn.textContent.includes('Start Practicing Now')) {
+                    btn.href = '/quiz';
+                    btn.addEventListener('click', function (e) {
+                        e.preventDefault();
+                        window.location.href = '/quiz';
+                    });
+                }
+            });
+        });
+    </script>
+
+</body>
+
+</html>

@@ -51,3 +51,28 @@ instance/
 # PyTorch
 *.pt
 *.pth
+
+# Test files and scripts
+test_*.py
+*_test.py
+test_*.bat
+*_test.bat
+create_test_user.py
+fix_*.py
+fix_*.bat
+migrate_*.py
+
+# Backup files
+*.bak
+*.backup
+*~
+
+# Database files (keep instance/ folder but ignore db files for now)
+*.db
+*.sqlite
+*.sqlite3
+
+# Cache and temporary files
+.cache/
+temp/
+tmp/

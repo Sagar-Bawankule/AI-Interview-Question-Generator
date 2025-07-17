@@ -1,0 +1,66 @@
+/* Footer styling */
+.bg-gradient-dark {
+    background: linear-gradient(135deg, #1a1a2e, #16213e);
+}
+
+.footer-link {
+    color: rgba(255, 255, 255, 0.7);
+    text-decoration: none;
+    display: block;
+    padding: 0.4rem 0;
+    transition: all 0.3s ease;
+}
+
+.footer-link:hover {
+    color: white;
+    transform: translateX(5px);
+}
+
+.text-light-muted {
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.social-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+    transition: all 0.3s ease;
+}
+
+.social-icon:hover {
+    background: var(--primary-color);
+    transform: translateY(-3px);
+}
+
+.newsletter-form .form-control {
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    color: white;
+    padding: 0.6rem 1rem;
+}
+
+.newsletter-form .form-control::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.newsletter-form .btn {
+    padding-left: 1.2rem;
+    padding-right: 1.2rem;
+}
+
+footer hr {
+    opacity: 0.1;
+}
+
+/* Animations for scroll reveal */
+.reveal-on-scroll {
+    opacity: 0;
+}
+
+.reveal-on-scroll.animate__animated {
+    opacity: 1;
+}

@@ -1,6 +1,6 @@
 # AI Interview Question Generator & Evaluator
 
-A comprehensive web application built with Flask that uses AI to generate interview questions and intelligently evaluate answers. Perfect for preparing for technical interviews across various subjects.
+A comprehensive web application built with Flask that uses Hugging Face AI models to generate interview questions and intelligently evaluate answers. Perfect for preparing for technical interviews across various subjects.
 
 ![Python](https://img.shields.io/badge/Python-3.8+-blue.svg)
 ![Flask](https://img.shields.io/badge/Flask-2.3+-green.svg)
@@ -8,9 +8,9 @@ A comprehensive web application built with Flask that uses AI to generate interv
 
 ## Features
 
-- Generate interview questions on any subject using GPT-2
+- Generate interview questions on any subject using Hugging Face's Flan-T5 model
 - User-friendly interface for answering questions
-- AI-powered evaluation of answers using T5 model
+- AI-powered evaluation of answers using Sentence Transformers
 - Detailed feedback with correctness rating, comments, and score
 - Responsive design using Bootstrap
 

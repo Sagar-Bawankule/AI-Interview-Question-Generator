@@ -1,30 +1,54 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard - AI Interview Question Generator</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/footer.css') }}">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
+
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-gradient-primary sticky-top">
         <div class="container">
-            <a class="navbar-brand" href="{{ url_for('index') }}">AI Interview Question Generator</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <a class="navbar-brand fw-bold d-flex align-items-center" href="{{ url_for('index') }}">
+                <i class="fas fa-robot me-2"></i>AI Interview Question Generator
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item">
-                        <a class="nav-link active" href="{{ url_for('dashboard') }}">Dashboard</a>
+                        <a class="nav-link active" href="{{ url_for('dashboard') }}">
+                            <i class="fas fa-tachometer-alt me-1"></i> Dashboard
+                        </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('quiz') }}">Practice</a>
+                        <a class="nav-link" href="{{ url_for('quiz') }}">
+                            <i class="fas fa-question-circle me-1"></i> Practice
+                        </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('auth.logout') }}">Logout</a>
+                        <a class="nav-link" href="{{ url_for('leaderboard') }}">
+                            <i class="fas fa-trophy me-1"></i> Leaderboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('auth.logout') }}">
+                            <i class="fas fa-sign-out-alt me-1"></i> Logout
+                        </a>
+                    </li>
+                    <li class="nav-item ms-2">
+                        <button id="themeToggle" class="btn btn-sm btn-outline-light rounded-circle">
+                            <span id="themeIcon">🌙</span>
+                        </button>
                     </li>
                 </ul>
             </div>
@@ -33,64 +57,90 @@
 
     <div class="container my-5">
         {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                {% for category, message in messages %}
-                    <div class="alert alert-{{ category }}">{{ message }}</div>
-                {% endfor %}
-            {% endif %}
+        {% if messages %}
+        {% for category, message in messages %}
+        <div class="alert alert-{{ category }} animate__animated animate__fadeIn">{{ message }}</div>
+        {% endfor %}
+        {% endif %}
         {% endwith %}
-        
-        <div class="row mb-4">
-            <div class="col-md-12">
-                <h1>Welcome, {{ current_user.username }}!</h1>
-                <p class="lead">Track your progress and improve your interview skills</p>
+
+        <div class="row mb-5 animate__animated animate__fadeIn">
+            <div class="col-md-8">
+                <h1 class="display-5 fw-bold">Welcome, {{ current_user.username }}!</h1>
+                <p class="lead">Track your progress and improve your interview skills with our AI-powered platform.</p>
+            </div>
+            <div class="col-md-4 text-md-end">
+                <a href="{{ url_for('quiz') }}" class="btn btn-primary btn-lg shadow-sm">
+                    <i class="fas fa-play me-2"></i>Start New Practice
+                </a>
             </div>
         </div>
-        
+
         <!-- Stats Cards -->
-        <div class="row mb-4">
-            <div class="col-md-4">
-                <div class="card text-white bg-primary mb-3">
-                    <div class="card-body text-center">
+        <div class="row mb-5">
+            <div class="col-md-4 mb-4 reveal-on-scroll" data-animation="animate__fadeInUp">
+                <div class="card hover-card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center p-4">
+                        <div class="icon-circle bg-primary bg-opacity-10 text-primary mb-3">
+                            <i class="fas fa-question"></i>
+                        </div>
                         <h5 class="card-title">Total Questions</h5>
-                        <h2 class="display-4">{{ stats.total_questions }}</h2>
+                        <h2 class="display-4 fw-bold counter-value" data-target="{{ stats.total_questions }}">0</h2>
+                        <p class="text-muted">Questions answered so far</p>
                     </div>
                 </div>
             </div>
-            <div class="col-md-4">
-                <div class="card text-white bg-success mb-3">
-                    <div class="card-body text-center">
+            <div class="col-md-4 mb-4 reveal-on-scroll" data-animation="animate__fadeInUp"
+                style="animation-delay: 0.2s">
+                <div class="card hover-card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center p-4">
+                        <div class="icon-circle bg-success bg-opacity-10 text-success mb-3">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
                         <h5 class="card-title">Average Score</h5>
-                        <h2 class="display-4">{{ stats.average_score|round(1) }}/5</h2>
+                        <h2 class="display-4 fw-bold counter-value" data-target="{{ stats.average_score|round(1) }}">0
+                        </h2>
+                        <p class="text-muted">Out of 5.0 possible</p>
                     </div>
                 </div>
             </div>
-            <div class="col-md-4">
-                <div class="card text-white bg-info mb-3">
-                    <div class="card-body text-center">
+            <div class="col-md-4 mb-4 reveal-on-scroll" data-animation="animate__fadeInUp"
+                style="animation-delay: 0.4s">
+                <div class="card hover-card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center p-4">
+                        <div class="icon-circle bg-info bg-opacity-10 text-info mb-3">
+                            <i class="fas fa-clipboard-check"></i>
+                        </div>
                         <h5 class="card-title">Quiz Attempts</h5>
-                        <h2 class="display-4">{{ stats.total_attempts }}</h2>
+                        <h2 class="display-4 fw-bold counter-value" data-target="{{ stats.total_attempts }}">0</h2>
+                        <p class="text-muted">Practice sessions completed</p>
                     </div>
                 </div>
             </div>
         </div>
-        
+
         <!-- Progress Charts -->
-        <div class="row mb-4">
-            <div class="col-md-6">
-                <div class="card shadow-sm">
-                    <div class="card-header bg-light">
-                        <h5 class="card-title mb-0">Score Progress</h5>
+        <div class="row mb-5">
+            <div class="col-lg-6 mb-4 reveal-on-scroll" data-animation="animate__fadeIn">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-white border-bottom-0 pt-4 pb-0">
+                        <h5 class="card-title fw-bold mb-0">
+                            <i class="fas fa-chart-line text-primary me-2"></i>Score Progress
+                        </h5>
+                        <p class="text-muted small">Your performance over time</p>
                     </div>
                     <div class="card-body">
                         <canvas id="scoreChart" width="400" height="300"></canvas>
                     </div>
                 </div>
             </div>
-            <div class="col-md-6">
-                <div class="card shadow-sm">
-                    <div class="card-header bg-light">
-                        <h5 class="card-title mb-0">Subject Distribution</h5>
+            <div class="col-lg-6 mb-4 reveal-on-scroll" data-animation="animate__fadeIn" style="animation-delay: 0.2s">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-white border-bottom-0 pt-4 pb-0">
+                        <h5 class="card-title fw-bold mb-0">
+                            <i class="fas fa-chart-pie text-primary me-2"></i>Subject Distribution
+                        </h5>
+                        <p class="text-muted small">Breakdown by topic area</p>
                     </div>
                     <div class="card-body">
                         <canvas id="subjectChart" width="400" height="300"></canvas>
@@ -98,34 +148,63 @@
                 </div>
             </div>
         </div>
-        
+
         <!-- Recent Attempts -->
-        <div class="card shadow-sm">
-            <div class="card-header bg-light">
-                <h5 class="card-title mb-0">Recent Quiz Attempts</h5>
+        <div class="card border-0 shadow-sm mb-5 reveal-on-scroll" data-animation="animate__fadeIn">
+            <div class="card-header bg-white pt-4 pb-3 d-flex justify-content-between align-items-center">
+                <div>
+                    <h5 class="card-title fw-bold mb-0">
+                        <i class="fas fa-history text-primary me-2"></i>Recent Quiz Attempts
+                    </h5>
+                    <p class="text-muted small mb-0">Your latest practice sessions</p>
+                </div>
+                {% if attempts %}
+                <a href="#" class="btn btn-sm btn-outline-primary">View All</a>
+                {% endif %}
             </div>
-            <div class="card-body">
+            <div class="card-body p-0">
                 {% if attempts %}
                 <div class="table-responsive">
-                    <table class="table table-hover">
-                        <thead>
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="bg-light">
                             <tr>
-                                <th>Date</th>
+                                <th class="ps-4">Date</th>
                                 <th>Subject</th>
                                 <th>Difficulty</th>
                                 <th>Score</th>
-                                <th>Actions</th>
+                                <th class="text-end pe-4">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
                             {% for attempt in attempts %}
                             <tr>
-                                <td>{{ attempt.timestamp.strftime('%Y-%m-%d %H:%M') }}</td>
-                                <td>{{ attempt.subject }}</td>
-                                <td><span class="badge {% if attempt.difficulty == 'Easy' %}bg-success{% elif attempt.difficulty == 'Medium' %}bg-warning{% else %}bg-danger{% endif %}">{{ attempt.difficulty }}</span></td>
-                                <td>{{ attempt.average_score|round(1) }}/5</td>
+                                <td class="ps-4">{{ attempt.timestamp.strftime('%b %d, %Y') }}<br><span
+                                        class="text-muted small">{{ attempt.timestamp.strftime('%H:%M') }}</span></td>
                                 <td>
-                                    <a href="{{ url_for('view_attempt', attempt_id=attempt.id) }}" class="btn btn-sm btn-outline-primary">View Details</a>
+                                    <span class="d-inline-block text-truncate" style="max-width: 180px;">{{
+                                        attempt.subject }}</span>
+                                </td>
+                                <td>
+                                    <span
+                                        class="badge rounded-pill {% if attempt.difficulty == 'Easy' %}bg-success{% elif attempt.difficulty == 'Medium' %}bg-warning{% else %}bg-danger{% endif %} bg-opacity-75">{{
+                                        attempt.difficulty }}</span>
+                                </td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="progress flex-grow-1 me-2" style="height: 8px; width: 80px;">
+                                            <div class="progress-bar bg-primary" role="progressbar"
+                                                style="width: {{ (attempt.average_score/5)*100 }}%"
+                                                aria-valuenow="{{ (attempt.average_score/5)*100 }}" aria-valuemin="0"
+                                                aria-valuemax="100"></div>
+                                        </div>
+                                        <span class="small fw-bold">{{ attempt.average_score|round(1) }}/5</span>
+                                    </div>
+                                </td>
+                                <td class="text-end pe-4">
+                                    <a href="{{ url_for('view_attempt', attempt_id=attempt.id) }}"
+                                        class="btn btn-sm btn-primary">
+                                        <i class="fas fa-eye me-1"></i>View
+                                    </a>
                                 </td>
                             </tr>
                             {% endfor %}
@@ -133,79 +212,241 @@
                     </table>
                 </div>
                 {% else %}
-                <p class="text-center my-4">No quiz attempts found. <a href="{{ url_for('index') }}">Start practicing now!</a></p>
+                <div class="text-center py-5">
+                    <div class="mb-3">
+                        <i class="fas fa-clipboard-list text-muted" style="font-size: 3rem;"></i>
+                    </div>
+                    <h5>No quiz attempts found</h5>
+                    <p class="text-muted">Start practicing to see your results here!</p>
+                    <a href="{{ url_for('quiz') }}" class="btn btn-primary mt-2">
+                        <i class="fas fa-play me-2"></i>Start Practicing Now
+                    </a>
+                </div>
                 {% endif %}
             </div>
         </div>
     </div>
-    
-    <footer class="bg-light py-3 mt-5">
-        <div class="container text-center">
-            <p class="text-muted mb-0">AI Interview Question Generator & Evaluator &copy; 2025</p>
+
+    <!-- Footer -->
+    <footer class="bg-gradient-dark text-white py-5 mt-5">
+        <div class="container">
+            <div class="row g-4">
+                <div class="col-lg-4 col-md-6">
+                    <h5 class="fw-bold mb-3">AI Interview Question Generator</h5>
+                    <p class="text-light-muted">Powered by advanced AI technology to help you ace your technical
+                        interviews and improve your skills.</p>
+                    <div class="d-flex gap-3 mt-4">
+                        <a href="#" class="text-white social-icon"><i class="fab fa-github"></i></a>
+                        <a href="#" class="text-white social-icon"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="text-white social-icon"><i class="fab fa-linkedin"></i></a>
+                        <a href="#" class="text-white social-icon"><i class="fab fa-discord"></i></a>
+                    </div>
+                </div>
+                <div class="col-lg-2 col-md-6">
+                    <h6 class="fw-bold mb-3">Quick Links</h6>
+                    <ul class="list-unstyled footer-links">
+                        <li><a href="{{ url_for('index') }}" class="footer-link"><i
+                                    class="fas fa-home me-2"></i>Home</a></li>
+                        <li><a href="{{ url_for('dashboard') }}" class="footer-link"><i
+                                    class="fas fa-tachometer-alt me-2"></i>Dashboard</a></li>
+                        <li><a href="{{ url_for('quiz') }}" class="footer-link"><i
+                                    class="fas fa-question-circle me-2"></i>Practice</a></li>
+                        <li><a href="{{ url_for('leaderboard') }}" class="footer-link"><i
+                                    class="fas fa-trophy me-2"></i>Leaderboard</a></li>
+                    </ul>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <h6 class="fw-bold mb-3">Popular Topics</h6>
+                    <div class="d-flex flex-wrap gap-2">
+                        <a href="#"
+                            class="badge bg-primary bg-opacity-25 text-primary px-3 py-2 rounded-pill">Python</a>
+                        <a href="#"
+                            class="badge bg-primary bg-opacity-25 text-primary px-3 py-2 rounded-pill">JavaScript</a>
+                        <a href="#" class="badge bg-primary bg-opacity-25 text-primary px-3 py-2 rounded-pill">SQL</a>
+                        <a href="#" class="badge bg-primary bg-opacity-25 text-primary px-3 py-2 rounded-pill">Data
+                            Structures</a>
+                        <a href="#" class="badge bg-primary bg-opacity-25 text-primary px-3 py-2 rounded-pill">Machine
+                            Learning</a>
+                        <a href="#" class="badge bg-primary bg-opacity-25 text-primary px-3 py-2 rounded-pill">Web
+                            Dev</a>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <h6 class="fw-bold mb-3">Newsletter</h6>
+                    <p class="small text-light-muted">Subscribe to receive updates, new features, and interview tips.
+                    </p>
+                    <form class="newsletter-form mt-3">
+                        <div class="input-group">
+                            <input type="email" class="form-control" placeholder="Your email" aria-label="Your email">
+                            <button class="btn btn-primary" type="submit"><i class="fas fa-paper-plane"></i></button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <hr class="mt-4 mb-3 border-light opacity-10">
+            <div class="row align-items-center">
+                <div class="col-md-6 text-center text-md-start">
+                    <p class="small text-light-muted mb-md-0">© 2023 AI Interview Question Generator. All rights
+                        reserved.</p>
+                </div>
+                <div class="col-md-6 text-center text-md-end">
+                    <a href="#" class="text-decoration-none small text-light-muted me-3">Privacy Policy</a>
+                    <a href="#" class="text-decoration-none small text-light-muted me-3">Terms of Service</a>
+                    <a href="#" class="text-decoration-none small text-light-muted">Contact Us</a>
+                </div>
+            </div>
         </div>
     </footer>
-    
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+    <script src="{{ url_for('static', filename='js/animations.js') }}"></script>
     <script>
         // Score Progress Chart
         const scoreCtx = document.getElementById('scoreChart').getContext('2d');
         const scoreChart = new Chart(scoreCtx, {
             type: 'line',
             data: {
-                labels: {{ score_data.dates|tojson|safe }},
-                datasets: [{
-                    label: 'Average Score',
-                    data: {{ score_data.scores|tojson|safe }},
-                    backgroundColor: 'rgba(54, 162, 235, 0.2)',
-                    borderColor: 'rgba(54, 162, 235, 1)',
-                    borderWidth: 2,
-                    tension: 0.3
+                labels: {{ score_data.dates | tojson | safe }},
+        datasets: [{
+            label: 'Average Score',
+            data: {{ score_data.scores | tojson | safe }},
+            backgroundColor: 'rgba(67, 97, 238, 0.2)',
+            borderColor: 'rgba(67, 97, 238, 1)',
+            borderWidth: 3,
+            tension: 0.4,
+            pointBackgroundColor: '#ffffff',
+            pointBorderColor: 'rgba(67, 97, 238, 1)',
+            pointBorderWidth: 2,
+            pointRadius: 5,
+            pointHoverRadius: 7,
+            fill: true
                 }]
             },
-            options: {
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        max: 5
+        options: {
+            responsive: true,
+                maintainAspectRatio: false,
+                    scales: {
+                y: {
+                    beginAtZero: true,
+                        max: 5,
+                            grid: {
+                        display: true,
+                            drawBorder: false,
+                                color: 'rgba(200, 200, 200, 0.15)'
+                    },
+                    ticks: {
+                        font: {
+                            size: 12
+                        },
+                        color: '#888'
                     }
                 },
-                plugins: {
-                    legend: {
-                        display: true
+                x: {
+                    grid: {
+                        display: false
+                    },
+                    ticks: {
+                        font: {
+                            size: 12
+                        },
+                        color: '#888'
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    display: true,
+                        position: 'top',
+                            labels: {
+                        boxWidth: 15,
+                            usePointStyle: true,
+                                pointStyle: 'circle',
+                                    padding: 20,
+                                        font: {
+                            size: 13
+                        }
+                    }
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+                        padding: 10,
+                            titleFont: {
+                        size: 14
+                    },
+                    bodyFont: {
+                        size: 13
+                    },
+                    displayColors: false,
+                        callbacks: {
+                        label: function(context) {
+                            return `Score: ${context.raw}/5`;
+                        }
                     }
                 }
             }
+        }
         });
-        
+
         // Subject Distribution Chart
         const subjectCtx = document.getElementById('subjectChart').getContext('2d');
         const subjectChart = new Chart(subjectCtx, {
             type: 'doughnut',
             data: {
-                labels: {{ subject_data.subjects|tojson|safe }},
-                datasets: [{
-                    data: {{ subject_data.counts|tojson|safe }},
-                    backgroundColor: [
-                        'rgba(255, 99, 132, 0.7)',
-                        'rgba(54, 162, 235, 0.7)',
-                        'rgba(255, 206, 86, 0.7)',
-                        'rgba(75, 192, 192, 0.7)',
-                        'rgba(153, 102, 255, 0.7)',
-                        'rgba(255, 159, 64, 0.7)',
-                        'rgba(199, 199, 199, 0.7)'
-                    ],
-                    borderWidth: 1
+                labels: {{ subject_data.subjects | tojson | safe }},
+        datasets: [{
+            data: {{ subject_data.counts | tojson | safe }},
+            backgroundColor: [
+            'rgba(54, 162, 235, 0.8)',
+            'rgba(255, 99, 132, 0.8)',
+            'rgba(255, 206, 86, 0.8)',
+            'rgba(75, 192, 192, 0.8)',
+            'rgba(153, 102, 255, 0.8)',
+            'rgba(255, 159, 64, 0.8)',
+            'rgba(238, 130, 238, 0.8)',
+            'rgba(106, 90, 205, 0.8)',
+            'rgba(60, 179, 113, 0.8)'
+        ],
+            borderWidth: 0,
+            hoverOffset: 15
                 }]
             },
-            options: {
-                responsive: true,
-                plugins: {
-                    legend: {
-                        position: 'right',
+        options: {
+            responsive: true,
+                maintainAspectRatio: false,
+                    cutout: '65%',
+                        plugins: {
+                legend: {
+                    position: 'right',
+                        labels: {
+                        boxWidth: 15,
+                            padding: 15,
+                                font: {
+                            size: 12
+                        }
+                    }
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+                        padding: 10,
+                            titleFont: {
+                        size: 14
+                    },
+                    bodyFont: {
+                        size: 13
+                    },
+                    callbacks: {
+                        label: function(context) {
+                            const total = context.dataset.data.reduce((acc, data) => acc + data, 0);
+                            const percentage = Math.round((context.raw / total) * 100);
+                            return `${context.label}: ${context.raw} (${percentage}%)`;
+                        }
                     }
                 }
             }
+        }
         });
     </script>
 </body>
+
 </html>

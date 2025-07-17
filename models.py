@@ -65,7 +65,7 @@ class QuestionAnswer(db.Model):
     question_text = db.Column(db.Text, nullable=False)
     user_answer = db.Column(db.Text, nullable=False)
     model_answer = db.Column(db.Text, nullable=False)
-    correctness = db.Column(db.String(20), nullable=False)  # Correct, Partially Correct, Incorrect
+    correctness = db.Column(db.Text, nullable=False)  # Changed from String(20) to Text
     score = db.Column(db.Integer, nullable=False)  # 0-5
     feedback = db.Column(db.Text, nullable=False)
     

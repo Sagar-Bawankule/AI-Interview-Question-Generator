@@ -1,0 +1,101 @@
+/* Authentication Pages Styles */
+.auth-page {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    background-color: #f8f9fa;
+}
+
+.auth-bg-image {
+    background: linear-gradient(135deg, rgba(78, 84, 200, 0.8) 0%, rgba(143, 148, 251, 0.8) 100%), url('https://images.unsplash.com/photo-1573497620053-ea5300f94f21?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80');
+    background-size: cover;
+    background-position: center;
+    position: relative;
+}
+
+.auth-overlay {
+    height: 100%;
+}
+
+.feature-icon {
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.auth-form-container {
+    max-width: 500px;
+    width: 100%;
+}
+
+@media (max-width: 991.98px) {
+    .auth-page .row {
+        min-height: 100vh;
+    }
+}
+
+/* Dark Mode Styles for Auth Pages */
+.dark-mode .auth-page {
+    background-color: #121212;
+    color: #e0e0e0;
+}
+
+.dark-mode .auth-form-container {
+    background-color: #1e1e1e;
+    color: #e0e0e0;
+}
+
+.dark-mode .auth-form-container .form-control,
+.dark-mode .auth-form-container .input-group-text {
+    background-color: #2c2c2c;
+    border-color: #444;
+    color: #e0e0e0;
+}
+
+.dark-mode .auth-form-container .form-control::placeholder {
+    color: #888;
+}
+
+.dark-mode .auth-form-container .text-muted {
+    color: #a0a0a0 !important;
+}
+
+.dark-mode .auth-form-container a:not(.btn) {
+    color: #90caf9;
+}
+
+/* Password Strength Bar */
+.password-strength .progress {
+    border-radius: 2px;
+    margin-top: 5px;
+    height: 4px;
+}
+
+/* Form Animations */
+.auth-form .form-control:focus {
+    box-shadow: 0 0 0 0.25rem rgba(78, 84, 200, 0.25);
+    border-color: #8f94fb;
+}
+
+.auth-form .input-group:focus-within {
+    box-shadow: 0 0 0 0.25rem rgba(78, 84, 200, 0.1);
+    border-radius: 0.375rem;
+}
+
+.auth-form .form-check-input:checked {
+    background-color: #4e54c8;
+    border-color: #4e54c8;
+}
+
+/* Button Hover Animation */
+.auth-form .btn-primary {
+    transition: all 0.3s ease;
+}
+
+.auth-form .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(78, 84, 200, 0.4);
+}
