@@ -92,13 +92,13 @@ login_manager.login_message_category = 'info'
 def load_user(user_id):
     return User.query.get(int(user_id))
 
-# Force USE_MODELS to True to always use Hugging Face models
+# Configure model usage based on environment
 if 'RENDER' in os.environ:
-    # Always use models in production
-    USE_MODELS = True
-    print("Running in production with Hugging Face models")
+    # Disable heavy models in production to avoid memory issues
+    USE_MODELS = False
+    print("Running in production - using lightweight question generation")
 else:
-    # In development, always use models
+    # In development, use models if available
     USE_MODELS = True
     print("Development environment: Using Hugging Face models")
 
@@ -583,7 +583,375 @@ if USE_MODELS:
         USE_MODELS = False
 
 # Define helper functions for generating questions and answers
+def generate_questions_template_based(subject, difficulty, num_questions=5):
+    """Generate questions using predefined templates - memory efficient"""
+    
+    # Subject-specific question templates
+    templates = {
+        "Python Programming": {
+            "Beginner": [
+                "What are the basic data types in Python?",
+                "How do you create a list in Python?",
+                "What is the difference between a list and a tuple?",
+                "How do you write a for loop in Python?",
+                "What is a function in Python and how do you define one?",
+                "How do you handle exceptions in Python?",
+                "What is the difference between == and is operators?",
+                "How do you read a file in Python?",
+                "What are Python dictionaries and how do you use them?",
+                "How do you install packages using pip?"
+            ],
+            "Intermediate": [
+                "Explain list comprehensions in Python with examples.",
+                "What are decorators in Python and how do you use them?",
+                "How does Python's garbage collection work?",
+                "What is the difference between deep copy and shallow copy?",
+                "Explain the concept of generators in Python.",
+                "How do you implement inheritance in Python?",
+                "What are context managers and how do you create them?",
+                "Explain the Global Interpreter Lock (GIL) in Python.",
+                "How do you work with regular expressions in Python?",
+                "What are lambda functions and when should you use them?"
+            ],
+            "Advanced": [
+                "How do you implement design patterns like Singleton in Python?",
+                "Explain metaclasses in Python and their use cases.",
+                "How would you optimize Python code for better performance?",
+                "What are descriptors in Python and how do they work?",
+                "How do you implement asynchronous programming with asyncio?",
+                "Explain the differences between multiprocessing and multithreading.",
+                "How do you create custom iterators and iterables?",
+                "What are coroutines and how do they differ from generators?",
+                "How do you profile and debug Python applications?",
+                "Explain the memory management and optimization techniques."
+            ]
+        },
+        "JavaScript": {
+            "Beginner": [
+                "What are the primitive data types in JavaScript?",
+                "How do you declare variables in JavaScript?",
+                "What is the difference between let, const, and var?",
+                "How do you create and call functions in JavaScript?",
+                "What are JavaScript arrays and how do you manipulate them?",
+                "How do you handle events in JavaScript?",
+                "What is the DOM and how do you interact with it?",
+                "How do you use conditional statements in JavaScript?",
+                "What are JavaScript objects and how do you create them?",
+                "How do you debug JavaScript code?"
+            ],
+            "Intermediate": [
+                "Explain closures in JavaScript with examples.",
+                "What is hoisting in JavaScript?",
+                "How does the 'this' keyword work in JavaScript?",
+                "What are promises and how do you use them?",
+                "Explain the concept of prototypal inheritance.",
+                "How do you handle asynchronous operations in JavaScript?",
+                "What are arrow functions and how do they differ from regular functions?",
+                "How do you use the spread operator and destructuring?",
+                "What is event bubbling and event capturing?",
+                "How do you implement modules in JavaScript?"
+            ],
+            "Advanced": [
+                "How do you implement custom design patterns in JavaScript?",
+                "Explain the event loop and asynchronous execution model.",
+                "How do you optimize JavaScript performance?",
+                "What are Web Workers and when would you use them?",
+                "How do you implement memory management in JavaScript applications?",
+                "Explain the differences between various module systems.",
+                "How do you handle cross-browser compatibility issues?",
+                "What are service workers and how do they work?",
+                "How do you implement advanced error handling strategies?",
+                "Explain JavaScript engines and compilation processes."
+            ]
+        },
+        "Machine Learning": {
+            "Beginner": [
+                "What is machine learning and how does it differ from traditional programming?",
+                "What are the main types of machine learning algorithms?",
+                "What is the difference between supervised and unsupervised learning?",
+                "How do you prepare data for machine learning models?",
+                "What is overfitting and how do you prevent it?",
+                "What are training, validation, and test sets?",
+                "How do you evaluate the performance of a machine learning model?",
+                "What is feature engineering and why is it important?",
+                "What are some common machine learning algorithms?",
+                "How do you handle missing data in datasets?"
+            ],
+            "Intermediate": [
+                "Explain the bias-variance tradeoff in machine learning.",
+                "How do cross-validation techniques work?",
+                "What are ensemble methods and when do you use them?",
+                "How do you select the right algorithm for a problem?",
+                "What is regularization and how does it prevent overfitting?",
+                "Explain the concept of gradient descent optimization.",
+                "How do you handle imbalanced datasets?",
+                "What are the differences between bagging and boosting?",
+                "How do you perform hyperparameter tuning?",
+                "What are the assumptions of linear regression?"
+            ],
+            "Advanced": [
+                "How do you implement custom loss functions and optimizers?",
+                "Explain advanced ensemble techniques like stacking.",
+                "How do you handle concept drift in production models?",
+                "What are the challenges in deploying ML models at scale?",
+                "How do you implement online learning algorithms?",
+                "Explain advanced feature selection techniques.",
+                "How do you design A/B tests for machine learning models?",
+                "What are the ethical considerations in ML model development?",
+                "How do you implement model interpretability and explainability?",
+                "Explain advanced optimization techniques beyond gradient descent."
+            ]
+        }
+    }
+    
+    # Generic templates for subjects not specifically covered
+    generic_templates = {
+        "Beginner": [
+            f"What are the fundamental concepts of {subject}?",
+            f"How do you get started with {subject}?",
+            f"What are the basic principles of {subject}?",
+            f"What tools are commonly used in {subject}?",
+            f"What are some common use cases for {subject}?"
+        ],
+        "Intermediate": [
+            f"How do you solve complex problems using {subject}?",
+            f"What are the best practices in {subject}?",
+            f"How do you optimize performance in {subject}?",
+            f"What are the common challenges in {subject}?",
+            f"How do you debug issues in {subject}?"
+        ],
+        "Advanced": [
+            f"How do you architect scalable solutions using {subject}?",
+            f"What are the advanced techniques in {subject}?",
+            f"How do you handle enterprise-level {subject} implementations?",
+            f"What are the future trends in {subject}?",
+            f"How do you mentor others in {subject}?"
+        ]
+    }
+    
+    # Get questions for the specific subject and difficulty
+    if subject in templates and difficulty in templates[subject]:
+        questions = templates[subject][difficulty].copy()
+    else:
+        # Use generic templates
+        questions = generic_templates.get(difficulty, generic_templates["Intermediate"]).copy()
+        # Add more generic questions
+        questions.extend([
+            f"Describe a challenging project you worked on involving {subject}.",
+            f"How would you explain {subject} to a non-technical person?",
+            f"What resources do you recommend for learning {subject}?",
+            f"How has {subject} evolved in recent years?",
+            f"What are the career opportunities in {subject}?"
+        ])
+    
+    # Shuffle and return the requested number of questions
+    import random
+    random.shuffle(questions)
+    return questions[:num_questions]
+
 def generate_questions(subject, difficulty, num_questions=5, random_seed=None):
+    """Generate interview questions based on subject and difficulty level"""
+    # Set random seed if provided (for reproducibility in tests)
+    if random_seed is not None:
+        import random
+        random.seed(random_seed)
+    
+    # Create a cache key
+    cache_key = f"{subject.lower()}_{difficulty}_{num_questions}"
+    
+    # Check global cache
+    if not hasattr(generate_questions, '_question_cache'):
+        generate_questions._question_cache = {}
+    
+    # Check if we have cached results
+    if cache_key in generate_questions._question_cache:
+        print(f"Using cached questions for {subject}, difficulty: {difficulty}")
+        return generate_questions._question_cache[cache_key][:num_questions]
+    
+    # Try Hugging Face models first if available
+    global hugging_face_generator
+    if USE_MODELS and hugging_face_generator is not None:
+        try:
+            print(f"Generating questions with Hugging Face for {subject}, difficulty: {difficulty}")
+            questions = hugging_face_generator.generate_questions(subject, difficulty, num_questions)
+            if questions and len(questions) >= num_questions:
+                # Cache the results
+                generate_questions._question_cache[cache_key] = questions
+                return questions[:num_questions]
+        except Exception as e:
+            print(f"Hugging Face generation failed: {e}")
+    
+    # Fall back to template-based generation
+    print(f"Using template-based question generation for {subject}, difficulty: {difficulty}")
+    questions = generate_questions_template_based(subject, difficulty, num_questions)
+    
+    # Cache the results
+    generate_questions._question_cache[cache_key] = questions
+    return questions[:num_questions]
+    """Generate questions using predefined templates - memory efficient"""
+    
+    # Subject-specific question templates
+    templates = {
+        "Python Programming": {
+            "Beginner": [
+                "What are the basic data types in Python?",
+                "How do you create a list in Python?",
+                "What is the difference between a list and a tuple?",
+                "How do you write a for loop in Python?",
+                "What is a function in Python and how do you define one?",
+                "How do you handle exceptions in Python?",
+                "What is the difference between == and is operators?",
+                "How do you read a file in Python?",
+                "What are Python dictionaries and how do you use them?",
+                "How do you install packages using pip?"
+            ],
+            "Intermediate": [
+                "Explain list comprehensions in Python with examples.",
+                "What are decorators in Python and how do you use them?",
+                "How does Python's garbage collection work?",
+                "What is the difference between deep copy and shallow copy?",
+                "Explain the concept of generators in Python.",
+                "How do you implement inheritance in Python?",
+                "What are context managers and how do you create them?",
+                "Explain the Global Interpreter Lock (GIL) in Python.",
+                "How do you work with regular expressions in Python?",
+                "What are lambda functions and when should you use them?"
+            ],
+            "Advanced": [
+                "How do you implement design patterns like Singleton in Python?",
+                "Explain metaclasses in Python and their use cases.",
+                "How would you optimize Python code for better performance?",
+                "What are descriptors in Python and how do they work?",
+                "How do you implement asynchronous programming with asyncio?",
+                "Explain the differences between multiprocessing and multithreading.",
+                "How do you create custom iterators and iterables?",
+                "What are coroutines and how do they differ from generators?",
+                "How do you profile and debug Python applications?",
+                "Explain the memory management and optimization techniques."
+            ]
+        },
+        "JavaScript": {
+            "Beginner": [
+                "What are the primitive data types in JavaScript?",
+                "How do you declare variables in JavaScript?",
+                "What is the difference between let, const, and var?",
+                "How do you create and call functions in JavaScript?",
+                "What are JavaScript arrays and how do you manipulate them?",
+                "How do you handle events in JavaScript?",
+                "What is the DOM and how do you interact with it?",
+                "How do you use conditional statements in JavaScript?",
+                "What are JavaScript objects and how do you create them?",
+                "How do you debug JavaScript code?"
+            ],
+            "Intermediate": [
+                "Explain closures in JavaScript with examples.",
+                "What is hoisting in JavaScript?",
+                "How does the 'this' keyword work in JavaScript?",
+                "What are promises and how do you use them?",
+                "Explain the concept of prototypal inheritance.",
+                "How do you handle asynchronous operations in JavaScript?",
+                "What are arrow functions and how do they differ from regular functions?",
+                "How do you use the spread operator and destructuring?",
+                "What is event bubbling and event capturing?",
+                "How do you implement modules in JavaScript?"
+            ],
+            "Advanced": [
+                "How do you implement custom design patterns in JavaScript?",
+                "Explain the event loop and asynchronous execution model.",
+                "How do you optimize JavaScript performance?",
+                "What are Web Workers and when would you use them?",
+                "How do you implement memory management in JavaScript applications?",
+                "Explain the differences between various module systems.",
+                "How do you handle cross-browser compatibility issues?",
+                "What are service workers and how do they work?",
+                "How do you implement advanced error handling strategies?",
+                "Explain JavaScript engines and compilation processes."
+            ]
+        },
+        "Machine Learning": {
+            "Beginner": [
+                "What is machine learning and how does it differ from traditional programming?",
+                "What are the main types of machine learning algorithms?",
+                "What is the difference between supervised and unsupervised learning?",
+                "How do you prepare data for machine learning models?",
+                "What is overfitting and how do you prevent it?",
+                "What are training, validation, and test sets?",
+                "How do you evaluate the performance of a machine learning model?",
+                "What is feature engineering and why is it important?",
+                "What are some common machine learning algorithms?",
+                "How do you handle missing data in datasets?"
+            ],
+            "Intermediate": [
+                "Explain the bias-variance tradeoff in machine learning.",
+                "How do cross-validation techniques work?",
+                "What are ensemble methods and when do you use them?",
+                "How do you select the right algorithm for a problem?",
+                "What is regularization and how does it prevent overfitting?",
+                "Explain the concept of gradient descent optimization.",
+                "How do you handle imbalanced datasets?",
+                "What are the differences between bagging and boosting?",
+                "How do you perform hyperparameter tuning?",
+                "What are the assumptions of linear regression?"
+            ],
+            "Advanced": [
+                "How do you implement custom loss functions and optimizers?",
+                "Explain advanced ensemble techniques like stacking.",
+                "How do you handle concept drift in production models?",
+                "What are the challenges in deploying ML models at scale?",
+                "How do you implement online learning algorithms?",
+                "Explain advanced feature selection techniques.",
+                "How do you design A/B tests for machine learning models?",
+                "What are the ethical considerations in ML model development?",
+                "How do you implement model interpretability and explainability?",
+                "Explain advanced optimization techniques beyond gradient descent."
+            ]
+        }
+    }
+    
+    # Generic templates for subjects not specifically covered
+    generic_templates = {
+        "Beginner": [
+            f"What are the fundamental concepts of {subject}?",
+            f"How do you get started with {subject}?",
+            f"What are the basic principles of {subject}?",
+            f"What tools are commonly used in {subject}?",
+            f"What are some common use cases for {subject}?"
+        ],
+        "Intermediate": [
+            f"How do you solve complex problems using {subject}?",
+            f"What are the best practices in {subject}?",
+            f"How do you optimize performance in {subject}?",
+            f"What are the common challenges in {subject}?",
+            f"How do you debug issues in {subject}?"
+        ],
+        "Advanced": [
+            f"How do you architect scalable solutions using {subject}?",
+            f"What are the advanced techniques in {subject}?",
+            f"How do you handle enterprise-level {subject} implementations?",
+            f"What are the future trends in {subject}?",
+            f"How do you mentor others in {subject}?"
+        ]
+    }
+    
+    # Get questions for the specific subject and difficulty
+    if subject in templates and difficulty in templates[subject]:
+        questions = templates[subject][difficulty].copy()
+    else:
+        # Use generic templates
+        questions = generic_templates.get(difficulty, generic_templates["Intermediate"]).copy()
+        # Add more generic questions
+        questions.extend([
+            f"Describe a challenging project you worked on involving {subject}.",
+            f"How would you explain {subject} to a non-technical person?",
+            f"What resources do you recommend for learning {subject}?",
+            f"How has {subject} evolved in recent years?",
+            f"What are the career opportunities in {subject}?"
+        ])
+    
+    # Shuffle and return the requested number of questions
+    import random
+    random.shuffle(questions)
+    return questions[:num_questions]
     """Generate interview questions based on subject and difficulty level using Hugging Face models"""
     # Set random seed if provided (for reproducibility in tests)
     if random_seed is not None:
@@ -714,8 +1082,8 @@ def generate_contextual_answer(question, subject, difficulty):
                 f"Mastering this area contributes significantly to overall expertise in {subject}.")
 
 def generate_model_answer(question, subject, difficulty):
-    """Generate a model answer using only Hugging Face models"""
-    # Use Flan-T5 model for answer generation when available
+    """Generate a model answer using lightweight methods"""
+    # Try Hugging Face models first if available
     if USE_MODELS and 'flan_t5_model' in globals():
         try:
             # Create a prompt for the model
@@ -752,12 +1120,16 @@ def generate_model_answer(question, subject, difficulty):
                 return answer
         except Exception as e:
             print(f"Error generating model answer with Flan-T5: {e}")
-            # Fall back to SentenceTransformer-based answer if available
-            global hugging_face_evaluator
-            if hugging_face_evaluator is not None:
-                return hugging_face_evaluator.generate_model_answer(question, subject)
     
-    # Fall back to a simple contextual answer
+    # Use SentenceTransformer-based answer if available
+    global hugging_face_evaluator
+    if USE_MODELS and hugging_face_evaluator is not None:
+        try:
+            return hugging_face_evaluator.generate_model_answer(question, subject)
+        except Exception as e:
+            print(f"Error with SentenceTransformer answer generation: {e}")
+    
+    # Fall back to lightweight contextual answer generation
     return generate_contextual_answer(question, subject, difficulty)
     
 

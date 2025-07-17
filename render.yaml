@@ -14,7 +14,7 @@ services:
       - key: DEBUG
         value: false
       - key: USE_MODELS
-        value: false
+        value: "false"
       - key: MODEL_CACHE_DIR
         value: /tmp/models
       - key: RENDER
