@@ -130,8 +130,7 @@ MIT License
 
 ## Author
 
-Your Name
-
+Sagar Vinod Bawankule
 ---
 
 *Note: This application uses pre-trained models and may need fine-tuning for optimal performance in a production environment.*
