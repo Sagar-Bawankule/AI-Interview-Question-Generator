@@ -102,7 +102,7 @@ If you prefer to set up manually:
 
 ## How It Works
 
-1. **Question Generation**: Uses the GPT-2 model to generate relevant interview questions based on the user's chosen subject
+1. **Question Generation**: Uses the T5 model to generate relevant interview questions based on the user's chosen subject
 2. **Answer Evaluation**: Uses the T5 model to evaluate user answers and provide feedback
 3. **Results Display**: Shows a detailed evaluation with correctness, feedback, and rating for each answer
 
